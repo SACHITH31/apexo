@@ -3,6 +3,9 @@ import { Menu, Search, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useTeamTheme } from "@/lib/theme";
 import { teams } from "@/lib/mock-data";
+import { PageTransition } from "./PageTransition";
+import { OfflineBanner } from "./OfflineBanner";
+import { BottomNav } from "./BottomNav";
 
 const nav = [
   { to: "/",              label: "Home" },
