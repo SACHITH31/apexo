@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { driversById, races, teams } from "@/lib/mock-data";
 import { ChevronLeft, Award } from "lucide-react";
+import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/drivers/$driverId")({
   head: ({ params }) => {
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/drivers/$driverId")({
     return { driver: d };
   },
   component: DriverProfile,
+  pendingComponent: DetailSkeleton,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <h1 className="font-display text-4xl">Driver not found</h1>
