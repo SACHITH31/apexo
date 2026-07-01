@@ -162,7 +162,7 @@ export const races: Race[] = [
   { id: "2025-abudhabi",    round: 24, name: "Abu Dhabi GP",     officialName: "FORMULA 1 ETIHAD AIRWAYS ABU DHABI GRAND PRIX 2025", circuitId: "yas_marina", hasSprint: false, status: "upcoming", sessions: { fp1:"2027-03-22T09:30:00Z", fp2:"2027-03-22T13:00:00Z", fp3:"2027-03-23T10:30:00Z", quali:"2027-03-23T14:00:00Z", race:"2027-03-24T13:00:00Z" } },
 ];
 
-export const racesById = Object.fromEntries(races.map((r) => [r.id, r]));
+export const racesById: Record<string, Race> = Object.fromEntries(races.map((r) => [r.id, r]));
 
 export function getNextRace(): Race {
   const now = Date.now();

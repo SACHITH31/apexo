@@ -210,8 +210,6 @@ function SnapshotCard({ title, icon, href, children }: { title: string; icon: Re
 }
 
 function LastRaceCard() {
-  const last = [...racesById].map(() => 0); // placeholder to satisfy TS unused
-  void last;
   const completed = Object.values(racesById).filter((r) => r.status === "completed");
   const last2 = completed[completed.length - 1];
   if (!last2 || !last2.podium) return null;

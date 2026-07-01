@@ -112,7 +112,7 @@ function RacePage() {
             <Trophy className="h-3 w-3" /> Podium
           </h2>
           <div className="grid grid-cols-3 gap-3">
-            {r.podium.map((did, i) => {
+            {r.podium.map((did: string, i: number) => {
               const d = driversById[did];
               const t = teams[d.team];
               return (
