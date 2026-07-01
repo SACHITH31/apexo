@@ -1,13 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { Home, Calendar, Trophy, Users, Flag } from "lucide-react";
 
-const items = [
+type Item = {
+  to: "/" | "/calendar" | "/standings" | "/drivers" | "/circuits";
+  label: string;
+  icon: typeof Home;
+  exact?: boolean;
+};
+
+const items: Item[] = [
   { to: "/", label: "Home", icon: Home, exact: true },
   { to: "/calendar", label: "Calendar", icon: Calendar },
   { to: "/standings", label: "Standings", icon: Trophy },
   { to: "/drivers", label: "Drivers", icon: Users },
   { to: "/circuits", label: "Circuits", icon: Flag },
-] as const;
+];
 
 /** Native-feeling bottom tab bar for mobile. Hidden on lg+. */
 export function BottomNav() {
