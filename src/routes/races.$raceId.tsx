@@ -1,7 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { circuits, driversById, racesById, teams } from "@/lib/mock-data";
-import { ChevronLeft, Flag, Timer, Trophy, Wrench } from "lucide-react";
+import { ChevronLeft, Flag, Timer, Trophy, Wrench, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
+import { CircuitSignature } from "@/components/CircuitSignature";
+import { FormattedDate } from "@/components/ClientOnly";
 
 export const Route = createFileRoute("/races/$raceId")({
   head: ({ params }) => {
@@ -25,11 +27,6 @@ export const Route = createFileRoute("/races/$raceId")({
   ),
 });
 
-function fmt(iso?: string) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-}
-
 function RacePage() {
   const { race: r } = Route.useLoaderData();
   const c = circuits[r.circuitId];
@@ -51,27 +48,32 @@ function RacePage() {
         <ChevronLeft className="h-3 w-3" /> Calendar
       </Link>
 
-      <header className="relative overflow-hidden rounded-2xl carbon-texture border border-border p-6 sm:p-10">
-        <div className="absolute inset-y-0 left-0 w-1 accent-line" />
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          Round {r.round} · <span aria-hidden>{c.flag}</span> {c.country}
+      <header className="relative overflow-hidden rounded-2xl carbon-texture team-aura border border-border p-6 sm:p-10 animate-slide-up">
+        <div className="pointer-events-none absolute -right-6 -top-6 h-64 w-[28rem] text-accent opacity-25">
+          <CircuitSignature id={c.id} className="h-full w-full" strokeWidth={1.4} />
         </div>
-        <h1 className="mt-1 font-display text-4xl sm:text-6xl leading-none">{r.name}</h1>
-        <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{r.officialName}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {r.hasSprint && <Badge>Sprint weekend</Badge>}
-          <Badge>{isUpcoming ? "Upcoming" : "Completed"}</Badge>
+        <div className="absolute inset-y-0 left-0 w-1 accent-line" />
+        <div className="relative">
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            Round {r.round} · <span aria-hidden>{c.flag}</span> {c.country}
+          </div>
+          <h1 className="mt-1 font-display text-4xl sm:text-6xl leading-none">{r.name}</h1>
+          <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{r.officialName}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {r.hasSprint && <Badge><Zap className="h-3 w-3" /> Sprint weekend</Badge>}
+            <Badge>{isUpcoming ? "Upcoming" : "Completed"}</Badge>
+          </div>
         </div>
       </header>
 
       {isUpcoming && (
-        <section className="mt-6">
+        <section className="mt-6 animate-slide-up" style={{ animationDelay: "80ms" }}>
           <LightsOutCountdown target={r.sessions.race} label="Lights out" sublabel="Race start" />
         </section>
       )}
 
       <section className="mt-6 grid gap-6 md:grid-cols-2">
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-6 hover-lift">
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             <Timer className="h-3 w-3" /> Weekend schedule
           </div>
@@ -81,13 +83,14 @@ function RacePage() {
                 <li key={label} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                   <span className="text-sm uppercase tracking-widest text-muted-foreground">{label}</span>
                   <span className={"font-timing tabular-nums text-sm " + (label === "Race" ? "text-gradient-accent text-base" : "text-foreground")}>
-                    {fmt(iso)}
+                    <FormattedDate iso={iso} mode="weekday-datetime" />
                   </span>
                 </li>
               ) : null,
             )}
           </ul>
         </div>
+
 
         <div className="glass rounded-2xl p-6">
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
