@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Trophy, Clock, Flag, Sparkles, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
-import { FormattedDate } from "@/components/ClientOnly";
+import { ClientOnly, FormattedDate } from "@/components/ClientOnly";
 import {
   constructorStandings, driverStandings, driversById, getNextRace, circuits,
   pickOnThisDay, racesById, teams,
@@ -66,11 +66,27 @@ function Home() {
             </div>
 
             <div className="mt-8">
-              <LightsOutCountdown
-                target={nextRace.sessions.race}
-                label="Race start"
-                sublabel={<>Lights out · <FormattedDate iso={nextRace.sessions.race} mode="weekday-datetime" /></>}
-              />
+              <ClientOnly fallback={
+                <div className="relative overflow-hidden rounded-2xl glass-elevated p-6 sm:p-8">
+                  <div className="absolute inset-x-0 top-0 h-px accent-line" />
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Race start</div>
+                  <div className="mt-1 font-display text-2xl sm:text-3xl text-foreground">Lights out</div>
+                  <div className="mt-6 grid grid-cols-4 gap-2 sm:gap-4">
+                    {["Days", "Hours", "Min", "Sec"].map((u) => (
+                      <div key={u} className="text-center rounded-lg bg-surface/60 border border-border py-3 sm:py-4">
+                        <div className="font-timing tabular-nums text-3xl sm:text-5xl leading-none text-foreground">--</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{u}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              }>
+                <LightsOutCountdown
+                  target={nextRace.sessions.race}
+                  label="Race start"
+                  sublabel={<>Lights out · <FormattedDate iso={nextRace.sessions.race} mode="weekday-datetime" /></>}
+                />
+              </ClientOnly>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
