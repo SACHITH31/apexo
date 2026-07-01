@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { drivers, teams } from "@/lib/mock-data";
 import { DriverRow } from "@/components/DriverRow";
+import { DriversPageSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/drivers/")({
   head: () => ({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/drivers/")({
     ],
   }),
   component: DriversPage,
+  pendingComponent: DriversPageSkeleton,
 });
 
 function DriversPage() {
