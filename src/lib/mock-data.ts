@@ -72,7 +72,7 @@ export const drivers: Driver[] = [
   { id: "colapinto",  code: "COL", number: 43, firstName: "Franco",    lastName: "Colapinto", nationality: "Argentine",    flag: "🇦🇷", dob: "2003-05-27", team: "alpine",   championships: 0, wins: 0,  podiums: 0,   poles: 0,  careerPoints: 5,    seasonPoints: 5,   seasonWins: 0, seasonPodiums: 0  },
 ];
 
-export const driversById = Object.fromEntries(drivers.map((d) => [d.id, d]));
+export const driversById: Record<string, Driver> = Object.fromEntries(drivers.map((d) => [d.id, d]));
 
 export interface Circuit {
   id: string;
