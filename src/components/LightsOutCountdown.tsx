@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 interface Props {
   target: string | Date;
-  label?: string;
-  sublabel?: string;
+  label?: ReactNode;
+  sublabel?: ReactNode;
 }
+
 
 /**
  * Lights-out countdown: 5 red lights illuminate one at a time as the clock
