@@ -3,6 +3,9 @@ import { Menu, Search, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useTeamTheme } from "@/lib/theme";
 import { teams } from "@/lib/mock-data";
+import { PageTransition } from "./PageTransition";
+import { OfflineBanner } from "./OfflineBanner";
+import { BottomNav } from "./BottomNav";
 
 const nav = [
   { to: "/",              label: "Home" },
@@ -114,15 +117,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      <main className="flex-1">{children}</main>
+      <OfflineBanner />
 
-      <footer className="border-t border-border/50 mt-12">
+      <main className="flex-1 pb-20 lg:pb-0 tap-highlight-none">
+        <PageTransition>{children}</PageTransition>
+      </main>
+
+      <footer className="border-t border-border/50 mt-12 pb-20 lg:pb-0">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 text-xs text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2">
           <span className="font-display tracking-widest text-sm text-foreground">APEXO</span>
           <span>Unofficial F1 companion. Not affiliated with the FIA or Formula One Group.</span>
           <span className="ml-auto">Data placeholders — live sync coming soon.</span>
         </div>
       </footer>
+
+      <BottomNav />
     </div>
   );
 }
