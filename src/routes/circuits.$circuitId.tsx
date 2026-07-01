@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { circuits, races } from "@/lib/mock-data";
 import { ChevronLeft } from "lucide-react";
+import { CircuitSignature } from "@/components/CircuitSignature";
 
 export const Route = createFileRoute("/circuits/$circuitId")({
   head: ({ params }) => {
@@ -34,15 +35,21 @@ function CircuitPage() {
         <ChevronLeft className="h-3 w-3" /> All circuits
       </Link>
 
-      <header className="relative overflow-hidden rounded-2xl carbon-texture border border-border p-6 sm:p-10">
-        <div className="absolute inset-y-0 left-0 w-1 accent-line" />
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          <span aria-hidden>{c.flag}</span> {c.country}
+      <header className="relative overflow-hidden rounded-2xl carbon-texture team-aura border border-border p-6 sm:p-10 animate-slide-up">
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 text-accent opacity-30">
+          <CircuitSignature id={c.id} className="h-full w-full" strokeWidth={1.6} />
         </div>
-        <h1 className="mt-1 font-display text-4xl sm:text-6xl leading-none">{c.name}</h1>
-        <p className="mt-2 text-muted-foreground">{c.location}</p>
-        <p className="mt-4 max-w-2xl">{c.notes}</p>
+        <div className="absolute inset-y-0 left-0 w-1 accent-line" />
+        <div className="relative">
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            <span aria-hidden>{c.flag}</span> {c.country}
+          </div>
+          <h1 className="mt-1 font-display text-4xl sm:text-6xl leading-none">{c.name}</h1>
+          <p className="mt-2 text-muted-foreground">{c.location}</p>
+          <p className="mt-4 max-w-2xl">{c.notes}</p>
+        </div>
       </header>
+
 
       <section className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Stat label="Length" value={`${c.lengthKm} km`} />
