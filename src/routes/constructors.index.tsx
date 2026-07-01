@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { constructorStandings, teams } from "@/lib/mock-data";
+import { ConstructorsSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/constructors/")({
   head: () => ({
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/constructors/")({
     ],
   }),
   component: ConstructorsIndex,
+  pendingComponent: ConstructorsSkeleton,
 });
 
 function ConstructorsIndex() {

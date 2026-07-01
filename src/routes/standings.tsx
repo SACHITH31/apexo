@@ -3,6 +3,7 @@ import { constructorStandings, driverStandings, teams } from "@/lib/mock-data";
 import { DriverRow } from "@/components/DriverRow";
 import { useState } from "react";
 import { Trophy } from "lucide-react";
+import { StandingsSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/standings")({
   head: () => ({
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/standings")({
     ],
   }),
   component: StandingsPage,
+  pendingComponent: StandingsSkeleton,
 });
 
 function StandingsPage() {

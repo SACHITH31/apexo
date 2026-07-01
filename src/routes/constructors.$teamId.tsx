@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { constructorStandings, drivers, teams } from "@/lib/mock-data";
 import { DriverRow } from "@/components/DriverRow";
 import { ChevronLeft } from "lucide-react";
+import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/constructors/$teamId")({
   head: ({ params }) => {
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/constructors/$teamId")({
     return { team: t };
   },
   component: TeamProfile,
+  pendingComponent: DetailSkeleton,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <h1 className="font-display text-4xl">Team not found</h1>

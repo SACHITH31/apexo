@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { circuits, races } from "@/lib/mock-data";
 import { ChevronLeft } from "lucide-react";
 import { CircuitSignature } from "@/components/CircuitSignature";
+import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/circuits/$circuitId")({
   head: ({ params }) => {
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/circuits/$circuitId")({
     return { circuit: c };
   },
   component: CircuitPage,
+  pendingComponent: DetailSkeleton,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <h1 className="font-display text-4xl">Circuit not found</h1>

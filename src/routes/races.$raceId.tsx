@@ -4,6 +4,7 @@ import { ChevronLeft, Flag, Timer, Trophy, Wrench, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { FormattedDate } from "@/components/ClientOnly";
+import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/races/$raceId")({
   head: ({ params }) => {
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/races/$raceId")({
     return { race: r };
   },
   component: RacePage,
+  pendingComponent: DetailSkeleton,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <h1 className="font-display text-4xl">Race not found</h1>
