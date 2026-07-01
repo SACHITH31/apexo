@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Trophy, Clock, Flag, Sparkles, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
-import { FormattedDate } from "@/components/ClientOnly";
+import { ClientOnly, FormattedDate } from "@/components/ClientOnly";
 import {
   constructorStandings, driverStandings, driversById, getNextRace, circuits,
   pickOnThisDay, racesById, teams,
