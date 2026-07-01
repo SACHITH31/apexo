@@ -9,38 +9,213 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StandingsRouteImport } from './routes/standings'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as GlossaryRouteImport } from './routes/glossary'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DriversIndexRouteImport } from './routes/drivers.index'
+import { Route as ConstructorsIndexRouteImport } from './routes/constructors.index'
+import { Route as CircuitsIndexRouteImport } from './routes/circuits.index'
+import { Route as RacesRaceIdRouteImport } from './routes/races.$raceId'
+import { Route as DriversDriverIdRouteImport } from './routes/drivers.$driverId'
+import { Route as ConstructorsTeamIdRouteImport } from './routes/constructors.$teamId'
+import { Route as CircuitsCircuitIdRouteImport } from './routes/circuits.$circuitId'
 
+const StandingsRoute = StandingsRouteImport.update({
+  id: '/standings',
+  path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GlossaryRoute = GlossaryRouteImport.update({
+  id: '/glossary',
+  path: '/glossary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DriversIndexRoute = DriversIndexRouteImport.update({
+  id: '/drivers/',
+  path: '/drivers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConstructorsIndexRoute = ConstructorsIndexRouteImport.update({
+  id: '/constructors/',
+  path: '/constructors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CircuitsIndexRoute = CircuitsIndexRouteImport.update({
+  id: '/circuits/',
+  path: '/circuits/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RacesRaceIdRoute = RacesRaceIdRouteImport.update({
+  id: '/races/$raceId',
+  path: '/races/$raceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriversDriverIdRoute = DriversDriverIdRouteImport.update({
+  id: '/drivers/$driverId',
+  path: '/drivers/$driverId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConstructorsTeamIdRoute = ConstructorsTeamIdRouteImport.update({
+  id: '/constructors/$teamId',
+  path: '/constructors/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CircuitsCircuitIdRoute = CircuitsCircuitIdRouteImport.update({
+  id: '/circuits/$circuitId',
+  path: '/circuits/$circuitId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/glossary': typeof GlossaryRoute
+  '/search': typeof SearchRoute
+  '/standings': typeof StandingsRoute
+  '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
+  '/constructors/$teamId': typeof ConstructorsTeamIdRoute
+  '/drivers/$driverId': typeof DriversDriverIdRoute
+  '/races/$raceId': typeof RacesRaceIdRoute
+  '/circuits/': typeof CircuitsIndexRoute
+  '/constructors/': typeof ConstructorsIndexRoute
+  '/drivers/': typeof DriversIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/glossary': typeof GlossaryRoute
+  '/search': typeof SearchRoute
+  '/standings': typeof StandingsRoute
+  '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
+  '/constructors/$teamId': typeof ConstructorsTeamIdRoute
+  '/drivers/$driverId': typeof DriversDriverIdRoute
+  '/races/$raceId': typeof RacesRaceIdRoute
+  '/circuits': typeof CircuitsIndexRoute
+  '/constructors': typeof ConstructorsIndexRoute
+  '/drivers': typeof DriversIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/glossary': typeof GlossaryRoute
+  '/search': typeof SearchRoute
+  '/standings': typeof StandingsRoute
+  '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
+  '/constructors/$teamId': typeof ConstructorsTeamIdRoute
+  '/drivers/$driverId': typeof DriversDriverIdRoute
+  '/races/$raceId': typeof RacesRaceIdRoute
+  '/circuits/': typeof CircuitsIndexRoute
+  '/constructors/': typeof ConstructorsIndexRoute
+  '/drivers/': typeof DriversIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/glossary'
+    | '/search'
+    | '/standings'
+    | '/circuits/$circuitId'
+    | '/constructors/$teamId'
+    | '/drivers/$driverId'
+    | '/races/$raceId'
+    | '/circuits/'
+    | '/constructors/'
+    | '/drivers/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/calendar'
+    | '/glossary'
+    | '/search'
+    | '/standings'
+    | '/circuits/$circuitId'
+    | '/constructors/$teamId'
+    | '/drivers/$driverId'
+    | '/races/$raceId'
+    | '/circuits'
+    | '/constructors'
+    | '/drivers'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar'
+    | '/glossary'
+    | '/search'
+    | '/standings'
+    | '/circuits/$circuitId'
+    | '/constructors/$teamId'
+    | '/drivers/$driverId'
+    | '/races/$raceId'
+    | '/circuits/'
+    | '/constructors/'
+    | '/drivers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalendarRoute: typeof CalendarRoute
+  GlossaryRoute: typeof GlossaryRoute
+  SearchRoute: typeof SearchRoute
+  StandingsRoute: typeof StandingsRoute
+  CircuitsCircuitIdRoute: typeof CircuitsCircuitIdRoute
+  ConstructorsTeamIdRoute: typeof ConstructorsTeamIdRoute
+  DriversDriverIdRoute: typeof DriversDriverIdRoute
+  RacesRaceIdRoute: typeof RacesRaceIdRoute
+  CircuitsIndexRoute: typeof CircuitsIndexRoute
+  ConstructorsIndexRoute: typeof ConstructorsIndexRoute
+  DriversIndexRoute: typeof DriversIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/standings': {
+      id: '/standings'
+      path: '/standings'
+      fullPath: '/standings'
+      preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/glossary': {
+      id: '/glossary'
+      path: '/glossary'
+      fullPath: '/glossary'
+      preLoaderRoute: typeof GlossaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +223,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/drivers/': {
+      id: '/drivers/'
+      path: '/drivers'
+      fullPath: '/drivers/'
+      preLoaderRoute: typeof DriversIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/constructors/': {
+      id: '/constructors/'
+      path: '/constructors'
+      fullPath: '/constructors/'
+      preLoaderRoute: typeof ConstructorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/circuits/': {
+      id: '/circuits/'
+      path: '/circuits'
+      fullPath: '/circuits/'
+      preLoaderRoute: typeof CircuitsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/races/$raceId': {
+      id: '/races/$raceId'
+      path: '/races/$raceId'
+      fullPath: '/races/$raceId'
+      preLoaderRoute: typeof RacesRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drivers/$driverId': {
+      id: '/drivers/$driverId'
+      path: '/drivers/$driverId'
+      fullPath: '/drivers/$driverId'
+      preLoaderRoute: typeof DriversDriverIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/constructors/$teamId': {
+      id: '/constructors/$teamId'
+      path: '/constructors/$teamId'
+      fullPath: '/constructors/$teamId'
+      preLoaderRoute: typeof ConstructorsTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/circuits/$circuitId': {
+      id: '/circuits/$circuitId'
+      path: '/circuits/$circuitId'
+      fullPath: '/circuits/$circuitId'
+      preLoaderRoute: typeof CircuitsCircuitIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalendarRoute: CalendarRoute,
+  GlossaryRoute: GlossaryRoute,
+  SearchRoute: SearchRoute,
+  StandingsRoute: StandingsRoute,
+  CircuitsCircuitIdRoute: CircuitsCircuitIdRoute,
+  ConstructorsTeamIdRoute: ConstructorsTeamIdRoute,
+  DriversDriverIdRoute: DriversDriverIdRoute,
+  RacesRaceIdRoute: RacesRaceIdRoute,
+  CircuitsIndexRoute: CircuitsIndexRoute,
+  ConstructorsIndexRoute: ConstructorsIndexRoute,
+  DriversIndexRoute: DriversIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
