@@ -16,19 +16,23 @@ import { ThemeProvider } from "../lib/theme";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+    <div className="flex min-h-[70dvh] items-center justify-center bg-background px-4 animate-page-in">
+      <div className="relative max-w-md text-center rounded-2xl glass-elevated p-10 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 checker-flag opacity-[0.06]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px accent-line" />
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Off the track</div>
+        <h1 className="mt-3 font-display text-7xl leading-none text-gradient-accent">404</h1>
+        <h2 className="mt-3 font-display text-2xl text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          Looks like this corner isn't on the circuit map. Let's get you back on the racing line.
         </p>
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold uppercase tracking-widest text-accent-foreground shadow-broadcast transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            style={{ backgroundImage: "var(--gradient-accent)" }}
           >
-            Go home
+            Back to pit lane
           </Link>
         </div>
       </div>
