@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { circuits } from "@/lib/mock-data";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { Zap } from "lucide-react";
+import { CircuitsSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/circuits/")({
   head: () => ({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/circuits/")({
     ],
   }),
   component: CircuitsIndex,
+  pendingComponent: CircuitsSkeleton,
 });
 
 function CircuitsIndex() {
