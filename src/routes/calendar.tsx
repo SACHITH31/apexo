@@ -3,6 +3,7 @@ import { circuits, races, type Race } from "@/lib/mock-data";
 import { Calendar as CalIcon, MapPin, Timer, Zap } from "lucide-react";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { FormattedDate } from "@/components/ClientOnly";
+import { CalendarSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/calendar")({
     ],
   }),
   component: CalendarPage,
+  pendingComponent: CalendarSkeleton,
 });
 
 function CalendarPage() {
