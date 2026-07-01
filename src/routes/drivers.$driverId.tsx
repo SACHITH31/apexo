@@ -27,7 +27,7 @@ export const Route = createFileRoute("/drivers/$driverId")({
 
 function DriverProfile() {
   const { driver: d } = Route.useLoaderData();
-  const t = teams[d.team];
+  const t = teams[d.team as keyof typeof teams];
   const age = new Date(Date.now() - new Date(d.dob).getTime()).getUTCFullYear() - 1970;
 
   const driverRaces = races
