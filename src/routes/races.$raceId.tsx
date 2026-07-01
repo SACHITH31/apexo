@@ -92,21 +92,27 @@ function RacePage() {
         </div>
 
 
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            <Flag className="h-3 w-3" /> Circuit
+        <div className="relative overflow-hidden glass rounded-2xl p-6 hover-lift">
+          <div className="pointer-events-none absolute -right-6 -bottom-6 h-40 w-56 text-accent opacity-15">
+            <CircuitSignature id={c.id} className="h-full w-full" strokeWidth={1.6} />
           </div>
-          <div className="mt-3 font-display text-2xl">{c.name}</div>
-          <div className="text-xs text-muted-foreground">{c.location}, {c.country}</div>
-          <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-            <div><dt className="text-[9px] uppercase tracking-widest text-muted-foreground">Length</dt><dd className="font-timing text-lg">{c.lengthKm} km</dd></div>
-            <div><dt className="text-[9px] uppercase tracking-widest text-muted-foreground">Laps</dt><dd className="font-timing text-lg">{c.laps}</dd></div>
-            <div><dt className="text-[9px] uppercase tracking-widest text-muted-foreground">DRS</dt><dd className="font-timing text-lg">{c.drsZones}</dd></div>
-          </dl>
-          <Link to="/circuits/$circuitId" params={{ circuitId: c.id }} className="mt-4 inline-block text-xs uppercase tracking-widest text-accent hover:underline">
-            Full circuit info →
-          </Link>
+          <div className="relative">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              <Flag className="h-3 w-3" /> Circuit
+            </div>
+            <div className="mt-3 font-display text-2xl">{c.name}</div>
+            <div className="text-xs text-muted-foreground">{c.location}, {c.country}</div>
+            <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div><dt className="text-[9px] uppercase tracking-widest text-muted-foreground">Length</dt><dd className="font-timing text-lg">{c.lengthKm} km</dd></div>
+              <div><dt className="text-[9px] uppercase tracking-widest text-muted-foreground">Laps</dt><dd className="font-timing text-lg">{c.laps}</dd></div>
+              <div><dt className="text-[9px] uppercase tracking-widest text-muted-foreground">DRS</dt><dd className="font-timing text-lg">{c.drsZones}</dd></div>
+            </dl>
+            <Link to="/circuits/$circuitId" params={{ circuitId: c.id }} className="mt-4 inline-block text-xs uppercase tracking-widest text-accent story-link">
+              Full circuit info →
+            </Link>
+          </div>
         </div>
+
       </section>
 
       {r.podium && (
