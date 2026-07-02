@@ -91,6 +91,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Live timing, calendar, standings, drivers and predictions — one place for every F1 weekend." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Apexo" },
+      { name: "application-name", content: "Apexo" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
