@@ -22,7 +22,11 @@ export const Route = createFileRoute("/races/$raceId")({
   }),
   loader: async ({ context, params }) => {
     const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
-    if (!data.racesById[params.raceId]) throw notFound();
+    const race = data.racesById[params.raceId];
+    if (!race) throw notFound();
+    if (race.status !== "upcoming") {
+      context.queryClient.prefetchQuery(raceDetailQueryOptions(race.round));
+    }
   },
   component: RacePage,
   pendingComponent: DetailSkeleton,
