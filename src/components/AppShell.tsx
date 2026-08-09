@@ -13,6 +13,9 @@ const nav = [
   { to: "/standings",     label: "Standings" },
   { to: "/statistics",    label: "Statistics" },
   { to: "/compare",       label: "Compare" },
+  { to: "/simulator",     label: "Simulator" },
+  { to: "/strategy",      label: "Strategy" },
+
   { to: "/drivers",       label: "Drivers" },
   { to: "/constructors",  label: "Teams" },
   { to: "/circuits",      label: "Circuits" },
