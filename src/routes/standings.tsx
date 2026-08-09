@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { useState } from "react";
 import { Trophy } from "lucide-react";
@@ -19,7 +19,8 @@ export const Route = createFileRoute("/standings")({
 });
 
 function StandingsPage() {
-  const { season, driverStandings, constructorStandings, teams } = useSeason();
+  const data = useSeason();
+  const { season, driverStandings, constructorStandings, teams } = data;
   const [tab, setTab] = useState<"drivers" | "constructors">("drivers");
   const leader = driverStandings[0]?.driver.seasonPoints ?? 1;
   const leadTeam = constructorStandings[0];
@@ -37,7 +38,7 @@ function StandingsPage() {
           {[driverStandings[1], driverStandings[0], driverStandings[2]].map((s, ix) => {
             if (!s) return <div key={ix} />;
             const rank = ix === 1 ? 1 : ix === 0 ? 2 : 3;
-            const t = teams[s.driver.team];
+            const t = teamOf(data, s.driver.team);
             const h = rank === 1 ? "h-40" : rank === 2 ? "h-32" : "h-28";
             return (
               <div key={s.driver.id} className={"relative overflow-hidden rounded-xl border p-4 flex flex-col justify-end " + h + " " + (rank === 1 ? "border-accent/60 carbon-texture shadow-broadcast" : "border-border bg-surface/40")}>
@@ -91,7 +92,7 @@ function StandingsPage() {
             const pct = (s.driver.seasonPoints / leader) * 100;
             return (
               <li key={s.driver.id} className="relative animate-slide-up" style={{ animationDelay: `${Math.min(i, 12) * 20}ms` }}>
-                <div className="absolute inset-y-0 left-0 pointer-events-none rounded-lg" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${teams[s.driver.team].color}22, transparent)` }} />
+                <div className="absolute inset-y-0 left-0 pointer-events-none rounded-lg" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${teamOf(data, s.driver.team).color}22, transparent)` }} />
                 <div className="relative">
                   <DriverRow
                     driver={s.driver}

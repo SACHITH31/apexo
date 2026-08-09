@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { ChevronLeft, Flag, Timer, Trophy, Wrench, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
@@ -29,7 +29,8 @@ export const Route = createFileRoute("/races/$raceId")({
 
 function RacePage() {
   const { raceId } = Route.useParams();
-  const { racesById, circuits, driversById, teams } = useSeason();
+  const data = useSeason();
+  const { racesById, circuits, driversById } = data;
   const r = racesById[raceId];
   const c = circuits[r.circuitId];
   const isUpcoming = r.status === "upcoming";
@@ -125,7 +126,7 @@ function RacePage() {
           <div className="grid grid-cols-3 gap-3">
             {r.podium.filter((did: string) => driversById[did]).map((did: string, i: number) => {
               const d = driversById[did];
-              const t = teams[d.team];
+              const t = teamOf(data, d.team);
               return (
                 <Link
                   key={did}
@@ -145,7 +146,7 @@ function RacePage() {
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {r.poleId && driversById[r.poleId] && (
-              <MiniStat label="Pole position" value={`${driversById[r.poleId].firstName} ${driversById[r.poleId].lastName}`} sub={teams[driversById[r.poleId].team].name} />
+              <MiniStat label="Pole position" value={`${driversById[r.poleId].firstName} ${driversById[r.poleId].lastName}`} sub={teamOf(data, driversById[r.poleId].team).name} />
             )}
             {r.fastestLap && driversById[r.fastestLap.driverId] && (
               <MiniStat label="Fastest lap" value={r.fastestLap.time} sub={`${driversById[r.fastestLap.driverId].lastName} · Lap ${r.fastestLap.lap}`} />

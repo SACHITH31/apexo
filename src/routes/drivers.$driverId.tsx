@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { ChevronLeft, Award } from "lucide-react";
 import { DetailSkeleton } from "@/components/Skeletons";
 
@@ -30,9 +30,10 @@ export const Route = createFileRoute("/drivers/$driverId")({
 
 function DriverProfile() {
   const { driverId } = Route.useParams();
-  const { driversById, teams, races, season } = useSeason();
+  const data = useSeason();
+  const { driversById, races, season } = data;
   const d = driversById[driverId];
-  const t = teams[d.team];
+  const t = teamOf(data, d.team);
   const age = new Date(Date.now() - new Date(d.dob).getTime()).getUTCFullYear() - 1970;
 
   const driverRaces = races

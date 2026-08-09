@@ -25,6 +25,23 @@ export function useSeason(): SeasonData {
   return useSuspenseQuery(seasonQueryOptions()).data;
 }
 
+/** Resolve a team by id with a safe fallback for unknown constructors. */
+export function teamOf(data: SeasonData, id: string) {
+  return (
+    data.teams[id] ?? {
+      id,
+      name: id.replace(/_/g, " "),
+      fullName: id.replace(/_/g, " "),
+      base: "—",
+      principal: "—",
+      color: "#8A8F98",
+      themeClass: "theme-haas",
+      championships: 0,
+      founded: new Date().getUTCFullYear(),
+    }
+  );
+}
+
 export function getNextRaceFrom(data: SeasonData) {
   const now = Date.now();
   return (

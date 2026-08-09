@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { DriversPageSkeleton } from "@/components/Skeletons";
 
@@ -15,7 +15,8 @@ export const Route = createFileRoute("/drivers/")({
 });
 
 function DriversPage() {
-  const { drivers, teams, season } = useSeason();
+  const data = useSeason();
+  const { drivers, season } = data;
   const sorted = [...drivers].sort((a, b) => b.seasonPoints - a.seasonPoints);
   const totalWins = drivers.reduce((s, d) => s + d.seasonWins, 0);
   const totalPodiums = drivers.reduce((s, d) => s + d.seasonPodiums, 0);
@@ -38,8 +39,8 @@ function DriversPage() {
               right={
                 <div className="text-right shrink-0">
                   <div className="font-timing text-2xl tabular-nums leading-none">{d.seasonPoints}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5" style={{ color: teams[d.team].color }}>
-                    {teams[d.team].name}
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5" style={{ color: teamOf(data, d.team).color }}>
+                    {teamOf(data, d.team).name}
                   </div>
                 </div>
               }
