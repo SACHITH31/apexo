@@ -95,7 +95,7 @@ export function WeatherCenter({ race, circuitId }: { race: Race; circuitId: stri
             >
               <span className="font-display text-base leading-none">{s.label}</span>
               <span className="text-[11px] text-muted-foreground">
-                <FormattedDate iso={s.iso ?? s.time} mode="weekday-datetime" />
+                <FormattedDate iso={s.time} mode="weekday-datetime" />
               </span>
               <span className="ml-auto flex items-center gap-3 font-timing tabular-nums text-xs text-muted-foreground">
                 <span className="text-foreground">{s.airTempC}°</span>
