@@ -68,6 +68,8 @@ function ComparePage() {
   const idA = a && options.some((o) => o.id === a) ? a : options[0]?.id;
   const idB = b && options.some((o) => o.id === b) ? b : options[1]?.id;
 
+  const h2h = useMemoH2H(stats, mode, idA ?? "", idB ?? "");
+
   const set = (patch: Partial<Search>) =>
     navigate({ search: (prev: Search) => ({ ...prev, ...patch }), replace: true });
 
@@ -83,8 +85,6 @@ function ComparePage() {
   const colorB = options.find((o) => o.id === idB)!.color;
 
   const metrics: CompareMetric[] = mode === "drivers" ? driverMetrics(stats, idA, idB) : teamMetrics(stats, idA, idB);
-
-  const h2h = useMemoH2H(stats, mode, idA, idB);
 
   const series: Series[] = [
     { key: idA, name: options.find((o) => o.id === idA)!.label, color: colorA },
