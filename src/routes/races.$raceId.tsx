@@ -107,6 +107,13 @@ function RacePage() {
         </section>
       )}
 
+      <div className="mt-6 space-y-6">
+        <LiveTrackStatus race={r} circuitId={c.id} events={detail.data?.events ?? []} />
+        <WeatherCenter race={r} circuitId={c.id} />
+      </div>
+
+
+
       <section className="mt-6 grid gap-6 md:grid-cols-2">
         <SessionHub race={r} />
 
