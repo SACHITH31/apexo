@@ -12,6 +12,9 @@ import { RaceControlTimeline, RaceControlTimelineSkeleton } from "@/components/R
 import { TyreTracker } from "@/components/TyreTracker";
 import { PitStopDashboard } from "@/components/PitStopDashboard";
 import { ShareCard } from "@/components/ShareCard";
+import { WeatherCenter } from "@/components/WeatherCenter";
+import { LiveTrackStatus } from "@/components/LiveTrackStatus";
+
 
 export const Route = createFileRoute("/races/$raceId")({
   head: () => ({
@@ -103,6 +106,13 @@ function RacePage() {
           <LightsOutCountdown target={r.sessions.race} label="Lights out" sublabel="Race start" />
         </section>
       )}
+
+      <div className="mt-6 space-y-6">
+        <LiveTrackStatus race={r} circuitId={c.id} events={detail.data?.events ?? []} />
+        <WeatherCenter race={r} circuitId={c.id} />
+      </div>
+
+
 
       <section className="mt-6 grid gap-6 md:grid-cols-2">
         <SessionHub race={r} />

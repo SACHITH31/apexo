@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StrategyRouteImport } from './routes/strategy'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as StandingsRouteImport } from './routes/standings'
+import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
@@ -25,6 +27,11 @@ import { Route as DriversDriverIdRouteImport } from './routes/drivers.$driverId'
 import { Route as ConstructorsTeamIdRouteImport } from './routes/constructors.$teamId'
 import { Route as CircuitsCircuitIdRouteImport } from './routes/circuits.$circuitId'
 
+const StrategyRoute = StrategyRouteImport.update({
+  id: '/strategy',
+  path: '/strategy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatisticsRoute = StatisticsRouteImport.update({
   id: '/statistics',
   path: '/statistics',
@@ -33,6 +40,11 @@ const StatisticsRoute = StatisticsRouteImport.update({
 const StandingsRoute = StandingsRouteImport.update({
   id: '/standings',
   path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulatorRoute = SimulatorRouteImport.update({
+  id: '/simulator',
+  path: '/simulator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -108,8 +120,10 @@ export interface FileRoutesByFullPath {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
+  '/strategy': typeof StrategyRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
   '/constructors/$teamId': typeof ConstructorsTeamIdRoute
   '/drivers/$driverId': typeof DriversDriverIdRoute
@@ -125,8 +139,10 @@ export interface FileRoutesByTo {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
+  '/strategy': typeof StrategyRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
   '/constructors/$teamId': typeof ConstructorsTeamIdRoute
   '/drivers/$driverId': typeof DriversDriverIdRoute
@@ -143,8 +159,10 @@ export interface FileRoutesById {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
+  '/strategy': typeof StrategyRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
   '/constructors/$teamId': typeof ConstructorsTeamIdRoute
   '/drivers/$driverId': typeof DriversDriverIdRoute
@@ -162,8 +180,10 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/simulator'
     | '/standings'
     | '/statistics'
+    | '/strategy'
     | '/circuits/$circuitId'
     | '/constructors/$teamId'
     | '/drivers/$driverId'
@@ -179,8 +199,10 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/simulator'
     | '/standings'
     | '/statistics'
+    | '/strategy'
     | '/circuits/$circuitId'
     | '/constructors/$teamId'
     | '/drivers/$driverId'
@@ -196,8 +218,10 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/simulator'
     | '/standings'
     | '/statistics'
+    | '/strategy'
     | '/circuits/$circuitId'
     | '/constructors/$teamId'
     | '/drivers/$driverId'
@@ -214,8 +238,10 @@ export interface RootRouteChildren {
   GlossaryRoute: typeof GlossaryRoute
   PlaygroundRoute: typeof PlaygroundRoute
   SearchRoute: typeof SearchRoute
+  SimulatorRoute: typeof SimulatorRoute
   StandingsRoute: typeof StandingsRoute
   StatisticsRoute: typeof StatisticsRoute
+  StrategyRoute: typeof StrategyRoute
   CircuitsCircuitIdRoute: typeof CircuitsCircuitIdRoute
   ConstructorsTeamIdRoute: typeof ConstructorsTeamIdRoute
   DriversDriverIdRoute: typeof DriversDriverIdRoute
@@ -227,6 +253,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/strategy': {
+      id: '/strategy'
+      path: '/strategy'
+      fullPath: '/strategy'
+      preLoaderRoute: typeof StrategyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/statistics': {
       id: '/statistics'
       path: '/statistics'
@@ -239,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/standings'
       fullPath: '/standings'
       preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulator': {
+      id: '/simulator'
+      path: '/simulator'
+      fullPath: '/simulator'
+      preLoaderRoute: typeof SimulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -342,8 +382,10 @@ const rootRouteChildren: RootRouteChildren = {
   GlossaryRoute: GlossaryRoute,
   PlaygroundRoute: PlaygroundRoute,
   SearchRoute: SearchRoute,
+  SimulatorRoute: SimulatorRoute,
   StandingsRoute: StandingsRoute,
   StatisticsRoute: StatisticsRoute,
+  StrategyRoute: StrategyRoute,
   CircuitsCircuitIdRoute: CircuitsCircuitIdRoute,
   ConstructorsTeamIdRoute: ConstructorsTeamIdRoute,
   DriversDriverIdRoute: DriversDriverIdRoute,
