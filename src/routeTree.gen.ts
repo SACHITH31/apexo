@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as StandingsRouteImport } from './routes/standings'
+import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
@@ -33,6 +34,11 @@ const StatisticsRoute = StatisticsRouteImport.update({
 const StandingsRoute = StandingsRouteImport.update({
   id: '/standings',
   path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulatorRoute = SimulatorRouteImport.update({
+  id: '/simulator',
+  path: '/simulator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/simulator'
     | '/standings'
     | '/statistics'
     | '/circuits/$circuitId'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/simulator'
     | '/standings'
     | '/statistics'
     | '/circuits/$circuitId'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/simulator'
     | '/standings'
     | '/statistics'
     | '/circuits/$circuitId'
@@ -214,6 +226,7 @@ export interface RootRouteChildren {
   GlossaryRoute: typeof GlossaryRoute
   PlaygroundRoute: typeof PlaygroundRoute
   SearchRoute: typeof SearchRoute
+  SimulatorRoute: typeof SimulatorRoute
   StandingsRoute: typeof StandingsRoute
   StatisticsRoute: typeof StatisticsRoute
   CircuitsCircuitIdRoute: typeof CircuitsCircuitIdRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/standings'
       fullPath: '/standings'
       preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulator': {
+      id: '/simulator'
+      path: '/simulator'
+      fullPath: '/simulator'
+      preLoaderRoute: typeof SimulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -342,6 +362,7 @@ const rootRouteChildren: RootRouteChildren = {
   GlossaryRoute: GlossaryRoute,
   PlaygroundRoute: PlaygroundRoute,
   SearchRoute: SearchRoute,
+  SimulatorRoute: SimulatorRoute,
   StandingsRoute: StandingsRoute,
   StatisticsRoute: StatisticsRoute,
   CircuitsCircuitIdRoute: CircuitsCircuitIdRoute,
