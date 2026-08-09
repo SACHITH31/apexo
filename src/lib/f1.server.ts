@@ -109,12 +109,13 @@ export async function fetchSeasonData(): Promise<SeasonData> {
   const seasonNum = Number(season);
   const apiRaces: AnyJson[] = schedule.MRData.RaceTable.Races ?? [];
 
-  const [p1, p2, p3, poles] = await Promise.all([
-    get<AnyJson>("current/results/1/?format=json&limit=100").catch(() => null),
-    get<AnyJson>("current/results/2/?format=json&limit=100").catch(() => null),
-    get<AnyJson>("current/results/3/?format=json&limit=100").catch(() => null),
-    get<AnyJson>("current/qualifying/1/?format=json&limit=100").catch(() => null),
-  ]);
+  // Sequential: the API rate-limits bursts, and a 429 would silently drop results.
+  const safeGet = (p: string) => get<AnyJson>(p).catch(() => null);
+  const p1 = await safeGet("current/results/1/?format=json&limit=100");
+  const p2 = await safeGet("current/results/2/?format=json&limit=100");
+  const p3 = await safeGet("current/results/3/?format=json&limit=100");
+  const poles = await safeGet("current/qualifying/1/?format=json&limit=100");
+
 
   const byRound = (payload: AnyJson | null, key: "Results" | "QualifyingResults") => {
     const map: Record<string, AnyJson> = {};
