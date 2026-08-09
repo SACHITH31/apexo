@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { ChevronLeft } from "lucide-react";
 import { DetailSkeleton } from "@/components/Skeletons";
@@ -31,8 +31,9 @@ export const Route = createFileRoute("/constructors/$teamId")({
 
 function TeamProfile() {
   const { teamId } = Route.useParams();
-  const { teams, drivers, constructorStandings, season } = useSeason();
-  const t = teams[teamId];
+  const data = useSeason();
+  const { drivers, constructorStandings, season } = data;
+  const t = teamOf(data, teamId);
   const roster = drivers.filter((d) => d.team === t.id);
   const standing = constructorStandings.find((c) => c.team.id === t.id);
 

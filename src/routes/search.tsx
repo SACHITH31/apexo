@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { Search as SearchIcon } from "lucide-react";
 
 export const Route = createFileRoute("/search")({
@@ -16,7 +16,8 @@ export const Route = createFileRoute("/search")({
 });
 
 function SearchPage() {
-  const { drivers, teams, circuits, races } = useSeason();
+  const data = useSeason();
+  const { drivers, teams, circuits, races } = data;
   const [q, setQ] = useState("");
   const query = q.trim().toLowerCase();
 
@@ -57,7 +58,7 @@ function SearchPage() {
         <div className="mt-8 space-y-8">
           <Section title="Drivers" empty={results.d.length === 0}>
             {results.d.map((d) => {
-              const t = teams[d.team];
+              const t = teamOf(data, d.team);
               return (
                 <Link key={d.id} to="/drivers/$driverId" params={{ driverId: d.id }} className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 p-3 hover:border-accent/50">
                   <div className="w-1 h-8 rounded-full" style={{ background: t.color }} />

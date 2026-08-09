@@ -152,7 +152,7 @@ function RacePage() {
               <MiniStat label="Fastest lap" value={r.fastestLap.time} sub={`${driversById[r.fastestLap.driverId].lastName} · Lap ${r.fastestLap.lap}`} />
             )}
             {r.fastestPit && (
-              <MiniStat label="Fastest pit" value={`${r.fastestPit.seconds.toFixed(2)}s`} sub={teams[r.fastestPit.team as keyof typeof teams].name} icon={<Wrench className="h-3 w-3" />} />)}
+              <MiniStat label="Fastest pit" value={`${r.fastestPit.seconds.toFixed(2)}s`} sub={teamOf(data, r.fastestPit.team).name} icon={<Wrench className="h-3 w-3" />} />)}
           </div>
         </section>
       )}
