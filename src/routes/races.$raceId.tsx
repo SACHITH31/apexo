@@ -1,10 +1,17 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
+import { raceDetailQueryOptions, useRaceDetail } from "@/lib/f1-extra-data";
 import { ChevronLeft, Flag, Timer, Trophy, Wrench, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { FormattedDate } from "@/components/ClientOnly";
 import { DetailSkeleton } from "@/components/Skeletons";
+import { SessionHub } from "@/components/SessionHub";
+import { RaceControlTimeline, RaceControlTimelineSkeleton } from "@/components/RaceControlTimeline";
+import { TyreTracker } from "@/components/TyreTracker";
+import { PitStopDashboard } from "@/components/PitStopDashboard";
+import { ShareCard } from "@/components/ShareCard";
 
 export const Route = createFileRoute("/races/$raceId")({
   head: () => ({
