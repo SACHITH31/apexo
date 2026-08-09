@@ -34,14 +34,19 @@ export interface SeasonData {
 
 /* ------------------------------- fetching ------------------------------- */
 
-async function get<T>(path: string): Promise<T> {
+async function get<T>(path: string, attempt = 0): Promise<T> {
   const res = await fetch(`${BASE}/${path}`, {
     headers: { accept: "application/json" },
     signal: AbortSignal.timeout(12_000),
   });
+  if (res.status === 429 && attempt < 3) {
+    await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+    return get<T>(path, attempt + 1);
+  }
   if (!res.ok) throw new Error(`Jolpica ${path} -> ${res.status}`);
   return (await res.json()) as T;
 }
+
 
 type AnyJson = Record<string, any>;
 
