@@ -102,7 +102,10 @@ function SeasonStoryPage() {
     [chapters, filter],
   );
 
-  const driverName = (id?: string) => (id ? (season.driversById[id]?.name ?? id) : "—");
+  const driverName = (id?: string) => {
+    const d = id ? season.driversById[id] : undefined;
+    return d ? `${d.firstName} ${d.lastName}` : (id ?? "—");
+  };
 
   if (!season.races.length) {
     return (
@@ -264,7 +267,10 @@ function Chapter({
   const pole = useMemo(() => entries.find((e) => e.grid === 1), [entries]);
   const fastest = useMemo(() => entries.find((e) => e.fastestLap), [entries]);
   const accent = winner ? teamOf(season, winner.constructorId).color : "var(--accent)";
-  const name = (id?: string) => (id ? (season.driversById[id]?.name ?? id) : "—");
+  const name = (id?: string) => {
+    const d = id ? season.driversById[id] : undefined;
+    return d ? `${d.firstName} ${d.lastName}` : (id ?? "—");
+  };
   const code = (id?: string) => (id ? (season.driversById[id]?.code ?? id.slice(0, 3).toUpperCase()) : "—");
 
   return (
