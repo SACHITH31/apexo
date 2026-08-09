@@ -24,7 +24,7 @@ export interface LiveAlert {
   severity: 0 | 1 | 2 | 3;
   createdAt: number;
   /** ms before auto-dismiss; 0 keeps it until dismissed. */
-  ttl: number;
+  ttl?: number;
 }
 
 interface AlertsApi {
