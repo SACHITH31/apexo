@@ -78,7 +78,7 @@ export function LiveAlertsProvider({ children }: { children: ReactNode }) {
     if (!alerts.length) return;
     const t = window.setInterval(() => {
       const now = Date.now();
-      setAlerts((list) => list.filter((a) => a.ttl === 0 || now - a.createdAt < a.ttl));
+      setAlerts((list) => list.filter((a) => !a.ttl || now - a.createdAt < a.ttl));
     }, 500);
     return () => window.clearInterval(t);
   }, [alerts.length]);
