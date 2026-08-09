@@ -12,7 +12,7 @@ export const Route = createFileRoute("/circuits/$circuitId")({
       { name: "description", content: c ? `${c.name} in ${c.location} — length, lap record, DRS zones, and history.` : "F1 circuit info." },
     ] };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const c = circuits[params.circuitId];
     if (!c) throw notFound();
     return { circuit: c };

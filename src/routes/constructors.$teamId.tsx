@@ -12,7 +12,7 @@ export const Route = createFileRoute("/constructors/$teamId")({
       { name: "description", content: t ? `${t.fullName} — 2025 lineup, championships, and season points.` : "F1 team profile." },
     ] };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const t = teams[params.teamId as keyof typeof teams];
     if (!t) throw notFound();
     return { team: t };
