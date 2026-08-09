@@ -1,7 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
+import { seasonStatsQueryOptions, useSeasonStats } from "@/lib/f1-extra-data";
 import { ChevronLeft, Award } from "lucide-react";
 import { DetailSkeleton } from "@/components/Skeletons";
+import { bioFor } from "@/lib/driver-career";
+import { CareerTimeline } from "@/components/CareerTimeline";
+import { DnaPanel } from "@/components/DnaRadar";
+import { driverDna } from "@/lib/f1-dna";
+import { ProShareCard } from "@/components/ProShareCard";
 
 export const Route = createFileRoute("/drivers/$driverId")({
   head: ({ params }) => {
@@ -17,6 +24,7 @@ export const Route = createFileRoute("/drivers/$driverId")({
   loader: async ({ context, params }) => {
     const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
     if (!data.driversById[params.driverId]) throw notFound();
+    context.queryClient.prefetchQuery(seasonStatsQueryOptions());
   },
   component: DriverProfile,
   pendingComponent: DetailSkeleton,
@@ -31,10 +39,24 @@ export const Route = createFileRoute("/drivers/$driverId")({
 function DriverProfile() {
   const { driverId } = Route.useParams();
   const data = useSeason();
+  const stats = useSeasonStats();
   const { driversById, races, season } = data;
   const d = driversById[driverId];
   const t = teamOf(data, d.team);
   const age = new Date(Date.now() - new Date(d.dob).getTime()).getUTCFullYear() - 1970;
+  const stat = stats.drivers[driverId];
+  const bio = useMemo(
+    () =>
+      bioFor(driverId, {
+        dob: d.dob,
+        team: t.id,
+        teamName: t.name,
+        wins: d.wins,
+        championships: d.championships,
+      }),
+    [driverId, d, t],
+  );
+  const dna = useMemo(() => driverDna(driverId, stat), [driverId, stat]);
 
   const driverRaces = races
     .filter((r) => r.status === "completed" && r.podium?.includes(d.id))
@@ -72,6 +94,25 @@ function DriverProfile() {
             >
               <span className="h-2 w-2 rounded-full" style={{ background: t.color }} /> {t.name}
             </Link>
+            <div className="mt-3">
+              <ProShareCard
+                label="Share driver card"
+                data={{
+                  eyebrow: `${season} · ${t.name}`,
+                  title: `${d.firstName} ${d.lastName}`,
+                  subtitle: `#${d.number} · ${d.nationality}`,
+                  accent: t.color,
+                  fileName: `apexo-${d.id}`,
+                  stats: [
+                    { label: "Season points", value: String(d.seasonPoints) },
+                    { label: "Wins", value: String(d.wins) },
+                    { label: "Podiums", value: String(d.podiums) },
+                    { label: "Poles", value: String(d.poles) },
+                    { label: "Titles", value: String(d.championships) },
+                  ],
+                }}
+              />
+            </div>
           </div>
         </div>
       </header>
@@ -97,6 +138,44 @@ function DriverProfile() {
         </div>
       </section>
 
+      <section className="mt-8">
+        <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">Profile</h2>
+        <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <Fact label="Driver number" value={`#${d.number}`} />
+          <Fact label="Nationality" value={`${d.flag} ${d.nationality}`} />
+          <Fact label="Birthplace" value={bio.birthplace ?? "—"} />
+          <Fact label="Date of birth" value={new Date(d.dob).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })} />
+          <Fact label="Height" value={bio.heightCm ? `${bio.heightCm} cm` : "—"} />
+          <Fact label="Debut season" value={bio.debutSeason ? String(bio.debutSeason) : "—"} />
+        </dl>
+      </section>
+
+      {stat && (
+        <section className="mt-8">
+          <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">Season record</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <BigStat label="Starts" value={stat.entries} />
+            <BigStat label="Fastest laps" value={stat.fastestLaps} />
+            <BigStat label="Avg finish" value={stat.avgFinish ? stat.avgFinish.toFixed(1) : "—"} />
+            <BigStat label="Avg grid" value={stat.avgGrid ? stat.avgGrid.toFixed(1) : "—"} />
+          </div>
+        </section>
+      )}
+
+      <section className="mt-8">
+        <DnaPanel
+          title={`${d.firstName} ${d.lastName}`}
+          subtitle="Performance fingerprint across ten racing traits"
+          profile={dna}
+          accent={t.color}
+        />
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">Career timeline</h2>
+        <CareerTimeline entries={bio.timeline} accent={t.color} />
+      </section>
+
       {driverRaces.length > 0 && (
         <section className="mt-8">
           <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 flex items-center gap-2">
@@ -117,6 +196,15 @@ function DriverProfile() {
           </ul>
         </section>
       )}
+    </div>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface/40 p-4">
+      <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</dt>
+      <dd className="mt-1 truncate font-display text-xl leading-tight">{value}</dd>
     </div>
   );
 }
