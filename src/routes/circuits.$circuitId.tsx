@@ -115,6 +115,16 @@ function CircuitPage() {
         </div>
       </section>
 
+      <section className="mt-8">
+        <DnaPanel
+          title={c.name}
+          subtitle="Circuit character across ten track traits"
+          profile={dna}
+          accent="var(--accent)"
+        />
+      </section>
+
+
       {race && (
         <section className="mt-6">
           <Link to="/races/$raceId" params={{ raceId: race.id }} className="glass rounded-2xl p-6 flex items-center justify-between hover:border-accent/50 border border-transparent">
