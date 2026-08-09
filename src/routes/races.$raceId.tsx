@@ -12,6 +12,9 @@ import { RaceControlTimeline, RaceControlTimelineSkeleton } from "@/components/R
 import { TyreTracker } from "@/components/TyreTracker";
 import { PitStopDashboard } from "@/components/PitStopDashboard";
 import { ShareCard } from "@/components/ShareCard";
+import { WeatherCenter } from "@/components/WeatherCenter";
+import { LiveTrackStatus } from "@/components/LiveTrackStatus";
+
 
 export const Route = createFileRoute("/races/$raceId")({
   head: () => ({
