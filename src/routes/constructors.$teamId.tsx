@@ -1,8 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
+import { seasonStatsQueryOptions, useSeasonStats } from "@/lib/f1-extra-data";
 import { DriverRow } from "@/components/DriverRow";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Factory } from "lucide-react";
 import { DetailSkeleton } from "@/components/Skeletons";
+import { garageFor } from "@/lib/team-garage";
+import { ChampionshipHistory } from "@/components/ChampionshipHistory";
+import { DnaPanel } from "@/components/DnaRadar";
+import { teamDna } from "@/lib/f1-dna";
+import { ProShareCard } from "@/components/ProShareCard";
 
 export const Route = createFileRoute("/constructors/$teamId")({
   head: ({ params }) => {
@@ -18,6 +25,7 @@ export const Route = createFileRoute("/constructors/$teamId")({
   loader: async ({ context, params }) => {
     const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
     if (!data.teams[params.teamId]) throw notFound();
+    context.queryClient.prefetchQuery(seasonStatsQueryOptions());
   },
   component: TeamProfile,
   pendingComponent: DetailSkeleton,
@@ -32,10 +40,17 @@ export const Route = createFileRoute("/constructors/$teamId")({
 function TeamProfile() {
   const { teamId } = Route.useParams();
   const data = useSeason();
+  const stats = useSeasonStats();
   const { drivers, constructorStandings, season } = data;
   const t = teamOf(data, teamId);
   const roster = drivers.filter((d) => d.team === t.id);
   const standing = constructorStandings.find((c) => c.team.id === t.id);
+  const garage = useMemo(() => garageFor(t.id, t.base), [t]);
+  const stat = stats.teams[t.id];
+  const dna = useMemo(() => teamDna(t.id, stat, t.championships), [t, stat]);
+  const roundsRun = stats.rounds.length;
+  const totalRounds = data.races.length || roundsRun;
+  const progress = totalRounds ? Math.round((roundsRun / totalRounds) * 100) : 0;
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
@@ -57,8 +72,86 @@ function TeamProfile() {
             <Stat label="Principal" value={t.principal} textual />
           </dl>
           <div className="mt-3 text-xs text-muted-foreground">Base: {t.base}</div>
+          <div className="mt-4">
+            <ProShareCard
+              label="Share team card"
+              data={{
+                eyebrow: `${season} Constructors`,
+                title: t.name,
+                subtitle: t.fullName,
+                accent: t.color,
+                fileName: `apexo-${t.id}`,
+                stats: [
+                  { label: "Championship position", value: `P${standing?.position ?? "-"}` },
+                  { label: "Points", value: String(standing?.points ?? 0) },
+                  { label: "Titles", value: String(t.championships) },
+                  { label: "Founded", value: String(t.founded) },
+                ],
+              }}
+            />
+          </div>
         </div>
       </header>
+
+      <section className="mt-8">
+        <h2 className="mb-3 flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          <Factory className="h-3 w-3" /> Team garage
+        </h2>
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <Spec label="Factory" value={garage.factory} />
+          <Spec label="Country" value={garage.country} />
+          <Spec label="Team principal" value={t.principal} />
+          <Spec label="Technical director" value={garage.technicalDirector} />
+          <Spec label="Power unit" value={garage.powerUnit} />
+          <Spec label="Engine supplier" value={garage.engineSupplier} />
+          <Spec label="Chassis" value={garage.chassis} />
+          <Spec label="Car name" value={garage.carName} />
+          <Spec label="Reserve driver" value={garage.reserveDriver ?? "—"} />
+        </dl>
+
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <Stat label="Titles" value={t.championships} />
+          <Stat label="Wins" value={garage.wins} />
+          <Stat label="Podiums" value={garage.podiums} />
+          <Stat label="Poles" value={garage.poles} />
+          <Stat label="Fastest laps" value={garage.fastestLaps} />
+          <Stat label="Founded" value={t.founded} />
+        </div>
+
+        <div className="mt-3 rounded-xl border border-border bg-surface/40 p-4">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              {season} season progress
+            </span>
+            <span className="font-timing tabular-nums text-sm">
+              {roundsRun}/{totalRounds} rounds
+            </span>
+          </div>
+          <div
+            className="mt-2 h-2 overflow-hidden rounded-full bg-surface"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${season} season progress`}
+          >
+            <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${progress}%`, background: t.color }} />
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <ChampionshipHistory years={garage.titleYears} accent={t.color} teamName={t.name} />
+      </section>
+
+      <section className="mt-8">
+        <DnaPanel
+          title={t.name}
+          subtitle="Constructor performance fingerprint"
+          profile={dna}
+          accent={t.color}
+        />
+      </section>
 
       <section className="mt-8">
         <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">{season} driver lineup</h2>
@@ -68,6 +161,15 @@ function TeamProfile() {
           ))}
         </ul>
       </section>
+    </div>
+  );
+}
+
+function Spec({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface/40 p-4">
+      <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</dt>
+      <dd className="mt-1 truncate font-display text-xl leading-tight">{value}</dd>
     </div>
   );
 }
