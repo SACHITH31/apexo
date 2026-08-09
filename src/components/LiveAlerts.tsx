@@ -1,6 +1,30 @@
 import { X } from "lucide-react";
-import { EventIcon } from "./RaceControlIcons";
-import { alertColor, alertLabel, useLiveAlerts, type LiveAlert } from "@/lib/live-alerts";
+import { AlertTriangle, Flag, Gauge, Radio, ShieldAlert, Timer, Zap } from "lucide-react";
+import { alertColor, alertLabel, useLiveAlerts, type AlertKind, type LiveAlert } from "@/lib/live-alerts";
+
+const ICONS: Record<string, typeof Flag> = {
+  session: Timer,
+  start: Zap,
+  green: Flag,
+  yellow: AlertTriangle,
+  "double-yellow": AlertTriangle,
+  red: ShieldAlert,
+  sc: ShieldAlert,
+  vsc: ShieldAlert,
+  chequered: Flag,
+  penalty: AlertTriangle,
+  "track-limits": AlertTriangle,
+  drs: Gauge,
+  pit: Timer,
+  "fastest-lap": Timer,
+  result: Flag,
+  info: Radio,
+};
+
+function AlertIcon({ kind, className }: { kind: AlertKind; className?: string }) {
+  const Icon = ICONS[kind] ?? Radio;
+  return <Icon className={className} />;
+}
 
 /**
  * In-app live alert host — a pinned broadcast banner for critical events plus a
@@ -45,7 +69,7 @@ function AlertBanner({ alert, onDismiss }: { alert: LiveAlert; onDismiss: () => 
           className="grid h-7 w-7 shrink-0 place-items-center rounded-full border"
           style={{ borderColor: color, color }}
         >
-          <EventIcon kind={alert.kind === "session" ? "info" : alert.kind} className="h-3.5 w-3.5" />
+          <AlertIcon kind={alert.kind} className="h-3.5 w-3.5" />
         </span>
         <div className="min-w-0">
           <div className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground">{alertLabel(alert.kind)}</div>
@@ -80,7 +104,7 @@ function AlertToast({ alert, onDismiss }: { alert: LiveAlert; onDismiss: () => v
           className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border"
           style={{ borderColor: color, color }}
         >
-          <EventIcon kind={alert.kind === "session" ? "info" : alert.kind} className="h-3.5 w-3.5" />
+          <AlertIcon kind={alert.kind} className="h-3.5 w-3.5" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground">{alertLabel(alert.kind)}</div>
