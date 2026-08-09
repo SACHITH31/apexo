@@ -13,6 +13,7 @@ import { Route as StrategyRouteImport } from './routes/strategy'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SimulatorRouteImport } from './routes/simulator'
+import { Route as SeasonStoryRouteImport } from './routes/season-story'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
@@ -45,6 +46,11 @@ const StandingsRoute = StandingsRouteImport.update({
 const SimulatorRoute = SimulatorRouteImport.update({
   id: '/simulator',
   path: '/simulator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeasonStoryRoute = SeasonStoryRouteImport.update({
+  id: '/season-story',
+  path: '/season-story',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/season-story': typeof SeasonStoryRoute
   '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/season-story': typeof SeasonStoryRoute
   '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
+  '/season-story': typeof SeasonStoryRoute
   '/simulator': typeof SimulatorRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/season-story'
     | '/simulator'
     | '/standings'
     | '/statistics'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/season-story'
     | '/simulator'
     | '/standings'
     | '/statistics'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/playground'
     | '/search'
+    | '/season-story'
     | '/simulator'
     | '/standings'
     | '/statistics'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   GlossaryRoute: typeof GlossaryRoute
   PlaygroundRoute: typeof PlaygroundRoute
   SearchRoute: typeof SearchRoute
+  SeasonStoryRoute: typeof SeasonStoryRoute
   SimulatorRoute: typeof SimulatorRoute
   StandingsRoute: typeof StandingsRoute
   StatisticsRoute: typeof StatisticsRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/simulator'
       fullPath: '/simulator'
       preLoaderRoute: typeof SimulatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/season-story': {
+      id: '/season-story'
+      path: '/season-story'
+      fullPath: '/season-story'
+      preLoaderRoute: typeof SeasonStoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   GlossaryRoute: GlossaryRoute,
   PlaygroundRoute: PlaygroundRoute,
   SearchRoute: SearchRoute,
+  SeasonStoryRoute: SeasonStoryRoute,
   SimulatorRoute: SimulatorRoute,
   StandingsRoute: StandingsRoute,
   StatisticsRoute: StatisticsRoute,
