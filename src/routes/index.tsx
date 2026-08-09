@@ -3,10 +3,8 @@ import { ChevronRight, Trophy, Clock, Flag, Sparkles, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { ClientOnly, FormattedDate } from "@/components/ClientOnly";
-import {
-  constructorStandings, driverStandings, driversById, getNextRace, circuits,
-  pickOnThisDay, racesById, teams,
-} from "@/lib/mock-data";
+import { pickOnThisDay } from "@/lib/mock-data";
+import { getNextRaceFrom, seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { useTeamTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/")({
@@ -17,10 +15,13 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: Home,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
 });
 
 function Home() {
-  const nextRace = getNextRace();
+  const season = useSeason();
+  const { circuits, teams, driversById, driverStandings, constructorStandings } = season;
+  const nextRace = getNextRaceFrom(season);
   const circuit = circuits[nextRace.circuitId];
   const otd = pickOnThisDay();
   const { favoriteTeam } = useTeamTheme();
@@ -46,7 +47,7 @@ function Home() {
           <div className="relative">
             <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
-              Round {nextRace.round} · 2025 Season · Up Next
+              Round {nextRace.round} · {season.season} Season · Up Next
             </div>
             <h1 className="mt-2 font-display text-4xl sm:text-6xl leading-none">
               <span className="text-gradient-accent">{nextRace.name.replace(/ GP$/, "")}</span>
@@ -245,6 +246,7 @@ function SnapshotCard({ title, icon, href, children }: { title: string; icon: Re
 }
 
 function LastRaceCard() {
+  const { racesById, circuits, driversById, teams } = useSeason();
   const completed = Object.values(racesById).filter((r) => r.status === "completed");
   const last2 = completed[completed.length - 1];
   if (!last2 || !last2.podium) return null;

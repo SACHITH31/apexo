@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { constructorStandings, driverStandings, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { useState } from "react";
 import { Trophy } from "lucide-react";
@@ -8,15 +8,18 @@ import { StandingsSkeleton } from "@/components/Skeletons";
 export const Route = createFileRoute("/standings")({
   head: () => ({
     meta: [
-      { title: "F1 Standings 2025 · Apexo" },
-      { name: "description", content: "Live 2025 Formula 1 Drivers' and Constructors' championship standings." },
+      { title: "F1 Championship Standings · Apexo" },
+      { name: "description", content: "Live Formula 1 Drivers' and Constructors' championship standings for the current season." },
     ],
   }),
   component: StandingsPage,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+
   pendingComponent: StandingsSkeleton,
 });
 
 function StandingsPage() {
+  const { season, driverStandings, constructorStandings, teams } = useSeason();
   const [tab, setTab] = useState<"drivers" | "constructors">("drivers");
   const leader = driverStandings[0]?.driver.seasonPoints ?? 1;
   const leadTeam = constructorStandings[0];
@@ -24,7 +27,7 @@ function StandingsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-6">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">2025 season</div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{season} season</div>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl">Championship <span className="text-gradient-accent">standings</span></h1>
       </header>
 

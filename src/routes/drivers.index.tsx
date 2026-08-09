@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { drivers, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { DriversPageSkeleton } from "@/components/Skeletons";
 

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { circuits } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { Zap } from "lucide-react";
 import { CircuitsSkeleton } from "@/components/Skeletons";
@@ -8,23 +8,27 @@ export const Route = createFileRoute("/circuits/")({
   head: () => ({
     meta: [
       { title: "F1 Circuits · Apexo" },
-      { name: "description", content: "Every Formula 1 circuit on the 2025 calendar — lap records, DRS zones, and history." },
+      { name: "description", content: "Every Formula 1 circuit on the current calendar — lap records, DRS zones, and history." },
     ],
   }),
   component: CircuitsIndex,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+
   pendingComponent: CircuitsSkeleton,
 });
 
 function CircuitsIndex() {
+  const { circuits, season } = useSeason();
+  const list = Object.values(circuits);
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-8">
         <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">The tracks</div>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl">Every <span className="text-gradient-accent">circuit</span></h1>
-        <p className="mt-2 text-muted-foreground max-w-xl">24 circuits, five continents. Signatures shown are stylized — swipe through for lap records and history.</p>
+        <p className="mt-2 text-muted-foreground max-w-xl">{list.length} circuits on the {season} calendar. Signatures shown are stylized — swipe through for lap records and history.</p>
       </header>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Object.values(circuits).map((c, i) => (
+        {list.map((c, i) => (
           <li key={c.id} className="animate-slide-up" style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}>
             <Link
               to="/circuits/$circuitId"
