@@ -73,11 +73,17 @@ export function RaceControlTimeline({
   driversByNumber: Record<number, Driver>;
   teamFor: (driver: Driver) => Team;
 }) {
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
+  const [active, setActive] = useState<string[]>(ALL_IDS);
+
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const g of GROUPS) map[g.id] = events.filter((e) => g.kinds.includes(e.kind)).length;
+    return map;
+  }, [events]);
 
   const groups = useMemo(() => {
-    const active = FILTERS.find((f) => f.id === filter);
-    const list = active?.kinds ? events.filter((e) => active.kinds!.includes(e.kind)) : events;
+    const kinds = new Set(GROUPS.filter((g) => active.includes(g.id)).flatMap((g) => g.kinds));
+    const list = events.filter((e) => kinds.has(e.kind));
     const byLap = new Map<number, RaceEvent[]>();
     for (const e of list) {
       const lap = e.lap ?? 0;
@@ -85,7 +91,12 @@ export function RaceControlTimeline({
       byLap.get(lap)!.push(e);
     }
     return [...byLap.entries()].sort((a, b) => a[0] - b[0]);
-  }, [events, filter]);
+  }, [events, active]);
+
+  const toggle = (id: string) =>
+    setActive((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const allOn = active.length === ALL_IDS.length;
 
   if (!events.length) {
     return (
@@ -106,25 +117,52 @@ export function RaceControlTimeline({
             {source === "live" ? "Live feed" : "Reconstructed"}
           </span>
         </div>
-        <div className="flex gap-1.5" role="tablist" aria-label="Filter race control events">
-          {FILTERS.map((f) => (
-            <button
-              key={f.id}
-              role="tab"
-              aria-selected={filter === f.id}
-              onClick={() => setFilter(f.id)}
-              className={
-                "rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors min-h-9 " +
-                (filter === f.id
-                  ? "border-accent/60 bg-accent/10 text-accent-glow"
-                  : "border-border bg-surface/50 text-muted-foreground hover:text-foreground hover:border-accent/40")
-              }
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter race control events">
+          <button
+            type="button"
+            aria-pressed={allOn}
+            onClick={() => setActive(allOn ? [] : ALL_IDS)}
+            className={
+              "rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors min-h-9 " +
+              (allOn
+                ? "border-accent/60 bg-accent/10 text-accent-glow"
+                : "border-border bg-surface/50 text-muted-foreground hover:text-foreground hover:border-accent/40")
+            }
+          >
+            {allOn ? "All" : "Select all"}
+          </button>
+          {GROUPS.map((g) => {
+            const on = active.includes(g.id);
+            return (
+              <button
+                key={g.id}
+                type="button"
+                aria-pressed={on}
+                disabled={counts[g.id] === 0}
+                onClick={() => toggle(g.id)}
+                className={
+                  "rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors min-h-9 disabled:opacity-35 disabled:cursor-not-allowed " +
+                  (on
+                    ? "border-accent/60 bg-accent/10 text-accent-glow"
+                    : "border-border bg-surface/50 text-muted-foreground hover:text-foreground hover:border-accent/40")
+                }
+              >
+                {g.label}
+                {counts[g.id] > 0 && (
+                  <span className="ml-1.5 font-timing tabular-nums opacity-70">{counts[g.id]}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {groups.length === 0 && (
+        <p className="px-5 pb-6 text-sm text-muted-foreground">
+          No events match the selected filters. Turn a category back on to see the race story.
+        </p>
+      )}
+
 
       <ol className="relative px-5 pb-6">
         <span
