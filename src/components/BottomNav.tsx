@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Calendar, Trophy, Users, Flag } from "lucide-react";
+import { Home, Calendar, Trophy, BarChart3, Users } from "lucide-react";
 
 type Item = {
-  to: "/" | "/calendar" | "/standings" | "/drivers" | "/circuits";
+  to: "/" | "/calendar" | "/standings" | "/statistics" | "/drivers";
   label: string;
   icon: typeof Home;
   exact?: boolean;
@@ -12,8 +12,8 @@ const items: Item[] = [
   { to: "/", label: "Home", icon: Home, exact: true },
   { to: "/calendar", label: "Calendar", icon: Calendar },
   { to: "/standings", label: "Standings", icon: Trophy },
+  { to: "/statistics", label: "Stats", icon: BarChart3 },
   { to: "/drivers", label: "Drivers", icon: Users },
-  { to: "/circuits", label: "Circuits", icon: Flag },
 ];
 
 /** Native-feeling bottom tab bar for mobile. Hidden on lg+. */
