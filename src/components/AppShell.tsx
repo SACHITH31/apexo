@@ -10,6 +10,7 @@ import { BottomNav } from "./BottomNav";
 const nav = [
   { to: "/",              label: "Home" },
   { to: "/calendar",      label: "Calendar" },
+  { to: "/season-story",  label: "Season Story" },
   { to: "/standings",     label: "Standings" },
   { to: "/statistics",    label: "Statistics" },
   { to: "/compare",       label: "Compare" },
