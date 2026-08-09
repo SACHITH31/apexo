@@ -14,7 +14,7 @@ export const Route = createFileRoute("/races/$raceId")({
       { name: "description", content: r ? `${r.officialName} — schedule, results, and race weekend info.` : "F1 race weekend." },
     ] };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const r = racesById[params.raceId];
     if (!r) throw notFound();
     return { race: r };

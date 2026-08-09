@@ -12,7 +12,7 @@ export const Route = createFileRoute("/drivers/$driverId")({
       { name: "description", content: d ? `${d.firstName} ${d.lastName} — ${teams[d.team].name} — 2025 season stats and career record.` : "F1 driver profile." },
     ] };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const d = driversById[params.driverId];
     if (!d) throw notFound();
     return { driver: d };
