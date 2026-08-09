@@ -14,6 +14,7 @@ import { PitStopDashboard } from "@/components/PitStopDashboard";
 import { ShareCard } from "@/components/ShareCard";
 import { WeatherCenter } from "@/components/WeatherCenter";
 import { LiveTrackStatus } from "@/components/LiveTrackStatus";
+import { useRaceEventAlerts, useSessionAlerts } from "@/lib/live-alerts";
 
 
 export const Route = createFileRoute("/races/$raceId")({
@@ -55,6 +56,10 @@ function RacePage() {
     [data.drivers],
   );
   const teamFor = (d: (typeof data.drivers)[number]) => teamOf(data, d.team);
+
+  // In-app live alerts for this weekend: session countdowns + race control feed.
+  useSessionAlerts(r.sessions, r.name);
+  useRaceEventAlerts(detail.data?.events ?? [], r.status === "live");
 
 
   return (

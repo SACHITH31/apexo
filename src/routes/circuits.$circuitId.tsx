@@ -5,6 +5,8 @@ import { CircuitSignature } from "@/components/CircuitSignature";
 import { DetailSkeleton } from "@/components/Skeletons";
 import { ShareCard } from "@/components/ShareCard";
 import { OVERTAKE_LABEL, WEAR_LABEL, profileFor } from "@/lib/circuit-profiles";
+import { DnaPanel } from "@/components/DnaRadar";
+import { circuitDna } from "@/lib/f1-dna";
 
 export const Route = createFileRoute("/circuits/$circuitId")({
   head: ({ params }) => {
@@ -37,6 +39,7 @@ function CircuitPage() {
   const c = circuits[circuitId];
   const race = races.find((r) => r.circuitId === c.id);
   const profile = profileFor(c.id, { lengthKm: c.lengthKm, drsZones: c.drsZones });
+  const dna = circuitDna(c.id, profile, c.drsZones);
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-10">
@@ -111,6 +114,16 @@ function CircuitPage() {
           />
         </div>
       </section>
+
+      <section className="mt-8">
+        <DnaPanel
+          title={c.name}
+          subtitle="Circuit character across ten track traits"
+          profile={dna}
+          accent="var(--accent)"
+        />
+      </section>
+
 
       {race && (
         <section className="mt-6">
