@@ -1,21 +1,23 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { circuits, races } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { ChevronLeft } from "lucide-react";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/circuits/$circuitId")({
   head: ({ params }) => {
-    const c = circuits[params.circuitId];
+    const name = params.circuitId
+      .split("_")
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ");
     return { meta: [
-      { title: c ? `${c.name} · Apexo` : "Circuit · Apexo" },
-      { name: "description", content: c ? `${c.name} in ${c.location} — length, lap record, DRS zones, and history.` : "F1 circuit info." },
+      { title: `${name} · Apexo` },
+      { name: "description", content: `${name} — circuit length, lap record, DRS zones, and history.` },
     ] };
   },
-  loader: async ({ params }) => {
-    const c = circuits[params.circuitId];
-    if (!c) throw notFound();
-    return { circuit: c };
+  loader: async ({ context, params }) => {
+    const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
+    if (!data.circuits[params.circuitId]) throw notFound();
   },
   component: CircuitPage,
   pendingComponent: DetailSkeleton,
@@ -28,7 +30,9 @@ export const Route = createFileRoute("/circuits/$circuitId")({
 });
 
 function CircuitPage() {
-  const { circuit: c } = Route.useLoaderData();
+  const { circuitId } = Route.useParams();
+  const { circuits, races, season } = useSeason();
+  const c = circuits[circuitId];
   const race = races.find((r) => r.circuitId === c.id);
 
   return (
@@ -73,7 +77,7 @@ function CircuitPage() {
         <section className="mt-6">
           <Link to="/races/$raceId" params={{ raceId: race.id }} className="glass rounded-2xl p-6 flex items-center justify-between hover:border-accent/50 border border-transparent">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">2025 event</div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{season} event</div>
               <div className="font-display text-2xl mt-1">{race.name}</div>
               <div className="text-xs text-muted-foreground">Round {race.round}</div>
             </div>

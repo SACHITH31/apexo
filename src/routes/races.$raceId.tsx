@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { circuits, driversById, racesById, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { ChevronLeft, Flag, Timer, Trophy, Wrench, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
@@ -7,17 +7,15 @@ import { FormattedDate } from "@/components/ClientOnly";
 import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/races/$raceId")({
-  head: ({ params }) => {
-    const r = racesById[params.raceId];
-    return { meta: [
-      { title: r ? `${r.name} · Apexo` : "Race · Apexo" },
-      { name: "description", content: r ? `${r.officialName} — schedule, results, and race weekend info.` : "F1 race weekend." },
-    ] };
-  },
-  loader: async ({ params }) => {
-    const r = racesById[params.raceId];
-    if (!r) throw notFound();
-    return { race: r };
+  head: () => ({
+    meta: [
+      { title: "Race weekend · Apexo" },
+      { name: "description", content: "Session times, circuit info, and results for this Formula 1 race weekend." },
+    ],
+  }),
+  loader: async ({ context, params }) => {
+    const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
+    if (!data.racesById[params.raceId]) throw notFound();
   },
   component: RacePage,
   pendingComponent: DetailSkeleton,
@@ -30,7 +28,9 @@ export const Route = createFileRoute("/races/$raceId")({
 });
 
 function RacePage() {
-  const { race: r } = Route.useLoaderData();
+  const { raceId } = Route.useParams();
+  const { racesById, circuits, driversById, teams } = useSeason();
+  const r = racesById[raceId];
   const c = circuits[r.circuitId];
   const isUpcoming = r.status === "upcoming";
 
@@ -123,7 +123,7 @@ function RacePage() {
             <Trophy className="h-3 w-3" /> Podium
           </h2>
           <div className="grid grid-cols-3 gap-3">
-            {r.podium.map((did: string, i: number) => {
+            {r.podium.filter((did: string) => driversById[did]).map((did: string, i: number) => {
               const d = driversById[did];
               const t = teams[d.team];
               return (
@@ -144,10 +144,10 @@ function RacePage() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {r.poleId && (
+            {r.poleId && driversById[r.poleId] && (
               <MiniStat label="Pole position" value={`${driversById[r.poleId].firstName} ${driversById[r.poleId].lastName}`} sub={teams[driversById[r.poleId].team].name} />
             )}
-            {r.fastestLap && (
+            {r.fastestLap && driversById[r.fastestLap.driverId] && (
               <MiniStat label="Fastest lap" value={r.fastestLap.time} sub={`${driversById[r.fastestLap.driverId].lastName} · Lap ${r.fastestLap.lap}`} />
             )}
             {r.fastestPit && (
