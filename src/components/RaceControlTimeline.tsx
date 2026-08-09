@@ -25,12 +25,19 @@ const ICONS: Record<RaceEventKind, typeof Flag> = {
   info: Radio,
 };
 
-const FILTERS: { id: "all" | "flags" | "incidents" | "pit"; label: string; kinds?: RaceEventKind[] }[] = [
-  { id: "all", label: "All" },
-  { id: "flags", label: "Flags", kinds: ["green", "yellow", "double-yellow", "red", "chequered", "sc", "vsc", "start"] },
-  { id: "incidents", label: "Incidents", kinds: ["penalty", "track-limits", "red", "sc", "vsc", "double-yellow"] },
-  { id: "pit", label: "Pit & pace", kinds: ["pit", "fastest-lap", "drs"] },
+/** Toggleable event groups — multi-select, so the story scroll stays intact. */
+const GROUPS: { id: string; label: string; kinds: RaceEventKind[] }[] = [
+  { id: "flags", label: "Flags", kinds: ["green", "yellow", "double-yellow", "chequered", "start"] },
+  { id: "sc", label: "Safety car", kinds: ["sc", "vsc"] },
+  { id: "red", label: "Red flag", kinds: ["red"] },
+  { id: "penalty", label: "Penalties", kinds: ["penalty", "track-limits"] },
+  { id: "pit", label: "Pit stops", kinds: ["pit"] },
+  { id: "pace", label: "Pace & DRS", kinds: ["fastest-lap", "drs"] },
+  { id: "info", label: "Info", kinds: ["info", "result"] },
 ];
+
+const ALL_IDS = GROUPS.map((g) => g.id);
+
 
 export function RaceControlTimelineSkeleton() {
   return (
