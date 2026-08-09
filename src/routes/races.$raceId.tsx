@@ -83,23 +83,7 @@ function RacePage() {
       )}
 
       <section className="mt-6 grid gap-6 md:grid-cols-2">
-        <div className="glass rounded-2xl p-6 hover-lift">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            <Timer className="h-3 w-3" /> Weekend schedule
-          </div>
-          <ul className="mt-4 divide-y divide-border">
-            {sessions.map(([label, iso]) =>
-              iso ? (
-                <li key={label} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-                  <span className="text-sm uppercase tracking-widest text-muted-foreground">{label}</span>
-                  <span className={"font-timing tabular-nums text-sm " + (label === "Race" ? "text-gradient-accent text-base" : "text-foreground")}>
-                    <FormattedDate iso={iso} mode="weekday-datetime" />
-                  </span>
-                </li>
-              ) : null,
-            )}
-          </ul>
-        </div>
+        <SessionHub race={r} />
 
 
         <div className="relative overflow-hidden glass rounded-2xl p-6 hover-lift">
