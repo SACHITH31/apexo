@@ -71,9 +71,29 @@ function RacePage() {
           </div>
           <h1 className="mt-1 font-display text-4xl sm:text-6xl leading-none">{r.name}</h1>
           <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{r.officialName}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {r.hasSprint && <Badge><Zap className="h-3 w-3" /> Sprint weekend</Badge>}
             <Badge>{isUpcoming ? "Upcoming" : "Completed"}</Badge>
+            <ShareCard
+              className="ml-auto"
+              eyebrow={`Round ${r.round} · ${c.country}`}
+              title={r.name}
+              subtitle={`${c.name} · ${c.location}`}
+              fileName={`apexo-${r.id}`}
+              stats={
+                r.podium && driversById[r.podium[0]]
+                  ? [
+                      { label: "Winner", value: driversById[r.podium[0]].lastName.toUpperCase() },
+                      { label: "Laps", value: String(c.laps) },
+                      { label: "Length", value: `${c.lengthKm} km` },
+                    ]
+                  : [
+                      { label: "Circuit", value: c.name },
+                      { label: "Laps", value: String(c.laps) },
+                      { label: "Length", value: `${c.lengthKm} km` },
+                    ]
+              }
+            />
           </div>
         </div>
       </header>
