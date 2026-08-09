@@ -42,15 +42,13 @@ function RacePage() {
   const c = circuits[r.circuitId];
   const isUpcoming = r.status === "upcoming";
 
-  const sessions: [string, string | undefined][] = [
-    ["FP1", r.sessions.fp1],
-    ["FP2", r.sessions.fp2],
-    ["FP3", r.sessions.fp3],
-    ["Sprint Quali", r.sessions.sprintQuali],
-    ["Sprint", r.sessions.sprint],
-    ["Qualifying", r.sessions.quali],
-    ["Race", r.sessions.race],
-  ];
+  const detail = useRaceDetail(r.round);
+  const driversByNumber = useMemo(
+    () => Object.fromEntries(data.drivers.map((d) => [d.number, d])),
+    [data.drivers],
+  );
+  const teamFor = (d: (typeof data.drivers)[number]) => teamOf(data, d.team);
+
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
