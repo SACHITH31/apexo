@@ -145,6 +145,45 @@ function RacePage() {
           </div>
         </section>
       )}
+
+      {!isUpcoming && (
+        <section className="mt-8 space-y-6">
+          <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
+            <Timer className="h-3 w-3" /> Race analysis
+          </h2>
+
+          {detail.isLoading ? (
+            <RaceControlTimelineSkeleton />
+          ) : (
+            <>
+              {detail.data?.stints?.length ? (
+                <TyreTracker
+                  stints={detail.data.stints}
+                  totalLaps={c.laps}
+                  driversByNumber={driversByNumber}
+                  teamFor={teamFor}
+                />
+              ) : null}
+
+              {detail.data?.pitStops?.length ? (
+                <PitStopDashboard
+                  pitStops={detail.data.pitStops}
+                  driversById={driversById}
+                  teamFor={teamFor}
+                />
+              ) : null}
+
+              <RaceControlTimeline
+                events={detail.data?.events ?? []}
+                source={detail.data?.eventsSource ?? "none"}
+                driversById={driversById}
+                driversByNumber={driversByNumber}
+                teamFor={teamFor}
+              />
+            </>
+          )}
+        </section>
+      )}
     </div>
   );
 }
