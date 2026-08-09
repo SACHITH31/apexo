@@ -103,6 +103,9 @@ function ComparePage() {
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             <Swords className="h-3 w-3" /> Head to head · {stats.season || season.season}
           </div>
+          <h1 className="mt-1 font-display text-4xl sm:text-5xl leading-none">
+            {mode === "drivers" ? "Driver vs Driver" : "Team vs Team"}
+          </h1>
 
           <div className="mt-3 flex gap-2">
             {(["drivers", "teams"] as const).map((m) => (

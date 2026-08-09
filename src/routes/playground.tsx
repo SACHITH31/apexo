@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Gamepad2, RotateCcw, Sparkles } from "lucide-react";
 import { seasonQueryOptions, teamOf, useSeason, type SeasonData } from "@/lib/f1-data";
 import { PageSkeleton } from "@/components/Skeletons";
@@ -95,7 +95,12 @@ function buildQuestions(data: SeasonData, count = 8): Question[] {
 function PlaygroundPage() {
   const data = useSeason();
   const [seed, setSeed] = useState(0);
-  const questions = useMemo(() => buildQuestions(data), [data, seed]);
+  // Questions are randomised, so they are only generated after hydration.
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  useEffect(() => {
+    setQuestions(buildQuestions(data));
+  }, [data, seed]);
 
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -104,7 +109,7 @@ function PlaygroundPage() {
   const [best, setBest] = useState(0);
 
   const q = questions[index];
-  const done = index >= questions.length;
+  const done = questions.length > 0 && index >= questions.length;
 
   const restart = useCallback(() => {
     setSeed((s) => s + 1);
@@ -155,7 +160,11 @@ function PlaygroundPage() {
         <Stat label="Best streak" value={String(best)} />
       </div>
 
-      {!done && q ? (
+      {!questions.length ? (
+        <section className="mt-5 glass rounded-2xl p-8 text-center text-sm text-muted-foreground">
+          Building your quiz…
+        </section>
+      ) : !done && q ? (
         <section key={q.id} className="mt-5 glass rounded-2xl p-5 sm:p-7 animate-page-in">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             <span>
