@@ -3,6 +3,8 @@ import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { ChevronLeft } from "lucide-react";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { DetailSkeleton } from "@/components/Skeletons";
+import { ShareCard } from "@/components/ShareCard";
+import { OVERTAKE_LABEL, WEAR_LABEL, profileFor } from "@/lib/circuit-profiles";
 
 export const Route = createFileRoute("/circuits/$circuitId")({
   head: ({ params }) => {
@@ -34,6 +36,7 @@ function CircuitPage() {
   const { circuits, races, season } = useSeason();
   const c = circuits[circuitId];
   const race = races.find((r) => r.circuitId === c.id);
+  const profile = profileFor(c.id, { lengthKm: c.lengthKm, drsZones: c.drsZones });
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-10">
@@ -62,14 +65,50 @@ function CircuitPage() {
         <Stat label="Race laps" value={c.laps} />
         <Stat label="DRS zones" value={c.drsZones} />
         <Stat label="First GP" value={c.firstGp} />
+        <Stat label="Corners" value={profile.corners} />
+        <Stat label="Elevation" value={`${profile.elevationM} m`} />
+        <Stat label="Top speed" value={`${profile.topSpeedKph} kph`} />
+        <Stat label="Full distance" value={`${(c.lengthKm * c.laps).toFixed(1)} km`} />
       </section>
 
-      <section className="mt-6 glass rounded-2xl p-6">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Lap record</div>
-        <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          <div className="font-timing text-4xl tabular-nums text-gradient-accent">{c.lapRecord.time}</div>
-          <div className="text-foreground">{c.lapRecord.driver}</div>
-          <div className="text-muted-foreground">({c.lapRecord.year})</div>
+      <section className="mt-6 grid gap-6 md:grid-cols-2">
+        <div className="relative overflow-hidden glass rounded-2xl p-6 hover-lift">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px accent-line opacity-60" />
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Track demands</div>
+          <div className="mt-4 space-y-4">
+            <Meter label="Tyre wear" value={profile.tyreWear} caption={WEAR_LABEL[profile.tyreWear]} />
+            <Meter label="Brake wear" value={profile.brakeWear} caption={WEAR_LABEL[profile.brakeWear]} />
+            <Meter
+              label="Overtaking"
+              value={profile.overtaking}
+              caption={OVERTAKE_LABEL[profile.overtaking]}
+            />
+          </div>
+        </div>
+
+        <div className="glass rounded-2xl p-6 hover-lift">
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Lap record</div>
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <div className="font-timing text-4xl tabular-nums text-gradient-accent">{c.lapRecord.time}</div>
+            <div className="text-foreground">{c.lapRecord.driver}</div>
+            <div className="text-muted-foreground">({c.lapRecord.year})</div>
+          </div>
+          {profile.history && (
+            <p className="mt-4 text-sm text-muted-foreground border-t border-border pt-4">{profile.history}</p>
+          )}
+          <ShareCard
+            className="mt-5"
+            eyebrow={`${c.country} · Circuit`}
+            title={c.name}
+            subtitle={c.location}
+            fileName={`apexo-${c.id}`}
+            stats={[
+              { label: "Length", value: `${c.lengthKm} km` },
+              { label: "Corners", value: String(profile.corners) },
+              { label: "Race laps", value: String(c.laps) },
+              { label: "Lap record", value: c.lapRecord.time },
+            ]}
+          />
         </div>
       </section>
 
@@ -85,6 +124,28 @@ function CircuitPage() {
           </Link>
         </section>
       )}
+    </div>
+  );
+}
+
+function Meter({ label, value, caption }: { label: string; value: number; caption: string }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between">
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
+        <span className="text-xs font-semibold uppercase tracking-widest">{caption}</span>
+      </div>
+      <div className="mt-1.5 flex gap-1.5" role="img" aria-label={`${label}: ${caption}`}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <span
+            key={i}
+            className={
+              "h-2 flex-1 rounded-full transition-colors " +
+              (i <= value ? "accent-line" : "bg-surface/70 border border-border")
+            }
+          />
+        ))}
+      </div>
     </div>
   );
 }

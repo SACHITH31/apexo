@@ -9,9 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DriversIndexRouteImport } from './routes/drivers.index'
@@ -22,6 +25,11 @@ import { Route as DriversDriverIdRouteImport } from './routes/drivers.$driverId'
 import { Route as ConstructorsTeamIdRouteImport } from './routes/constructors.$teamId'
 import { Route as CircuitsCircuitIdRouteImport } from './routes/circuits.$circuitId'
 
+const StatisticsRoute = StatisticsRouteImport.update({
+  id: '/statistics',
+  path: '/statistics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StandingsRoute = StandingsRouteImport.update({
   id: '/standings',
   path: '/standings',
@@ -32,9 +40,19 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlaygroundRoute = PlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GlossaryRoute = GlossaryRouteImport.update({
   id: '/glossary',
   path: '/glossary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -86,9 +104,12 @@ const CircuitsCircuitIdRoute = CircuitsCircuitIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
+  '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
   '/standings': typeof StandingsRoute
+  '/statistics': typeof StatisticsRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
   '/constructors/$teamId': typeof ConstructorsTeamIdRoute
   '/drivers/$driverId': typeof DriversDriverIdRoute
@@ -100,9 +121,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
+  '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
   '/standings': typeof StandingsRoute
+  '/statistics': typeof StatisticsRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
   '/constructors/$teamId': typeof ConstructorsTeamIdRoute
   '/drivers/$driverId': typeof DriversDriverIdRoute
@@ -115,9 +139,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
+  '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
   '/standings': typeof StandingsRoute
+  '/statistics': typeof StatisticsRoute
   '/circuits/$circuitId': typeof CircuitsCircuitIdRoute
   '/constructors/$teamId': typeof ConstructorsTeamIdRoute
   '/drivers/$driverId': typeof DriversDriverIdRoute
@@ -131,9 +158,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calendar'
+    | '/compare'
     | '/glossary'
+    | '/playground'
     | '/search'
     | '/standings'
+    | '/statistics'
     | '/circuits/$circuitId'
     | '/constructors/$teamId'
     | '/drivers/$driverId'
@@ -145,9 +175,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/calendar'
+    | '/compare'
     | '/glossary'
+    | '/playground'
     | '/search'
     | '/standings'
+    | '/statistics'
     | '/circuits/$circuitId'
     | '/constructors/$teamId'
     | '/drivers/$driverId'
@@ -159,9 +192,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/calendar'
+    | '/compare'
     | '/glossary'
+    | '/playground'
     | '/search'
     | '/standings'
+    | '/statistics'
     | '/circuits/$circuitId'
     | '/constructors/$teamId'
     | '/drivers/$driverId'
@@ -174,9 +210,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
+  CompareRoute: typeof CompareRoute
   GlossaryRoute: typeof GlossaryRoute
+  PlaygroundRoute: typeof PlaygroundRoute
   SearchRoute: typeof SearchRoute
   StandingsRoute: typeof StandingsRoute
+  StatisticsRoute: typeof StatisticsRoute
   CircuitsCircuitIdRoute: typeof CircuitsCircuitIdRoute
   ConstructorsTeamIdRoute: typeof ConstructorsTeamIdRoute
   DriversDriverIdRoute: typeof DriversDriverIdRoute
@@ -188,6 +227,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/statistics': {
+      id: '/statistics'
+      path: '/statistics'
+      fullPath: '/statistics'
+      preLoaderRoute: typeof StatisticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/standings': {
       id: '/standings'
       path: '/standings'
@@ -202,11 +248,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/playground': {
+      id: '/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof PlaygroundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/glossary': {
       id: '/glossary'
       path: '/glossary'
       fullPath: '/glossary'
       preLoaderRoute: typeof GlossaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendar': {
@@ -278,9 +338,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
+  CompareRoute: CompareRoute,
   GlossaryRoute: GlossaryRoute,
+  PlaygroundRoute: PlaygroundRoute,
   SearchRoute: SearchRoute,
   StandingsRoute: StandingsRoute,
+  StatisticsRoute: StatisticsRoute,
   CircuitsCircuitIdRoute: CircuitsCircuitIdRoute,
   ConstructorsTeamIdRoute: ConstructorsTeamIdRoute,
   DriversDriverIdRoute: DriversDriverIdRoute,

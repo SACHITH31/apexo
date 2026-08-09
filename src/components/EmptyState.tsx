@@ -12,7 +12,7 @@ export function EmptyState({
   title: string;
   description?: string;
   actionLabel?: string;
-  actionTo?: "/" | "/calendar" | "/standings" | "/drivers" | "/circuits" | "/search";
+  actionTo?: "/" | "/calendar" | "/standings" | "/drivers" | "/circuits" | "/search" | "/statistics" | "/compare" | "/playground";
 }) {
   return (
     <div className="relative overflow-hidden rounded-2xl glass border border-border p-10 text-center animate-page-in">

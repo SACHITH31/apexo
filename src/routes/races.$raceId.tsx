@@ -1,10 +1,17 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
+import { raceDetailQueryOptions, useRaceDetail } from "@/lib/f1-extra-data";
 import { ChevronLeft, Flag, Timer, Trophy, Wrench, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { FormattedDate } from "@/components/ClientOnly";
 import { DetailSkeleton } from "@/components/Skeletons";
+import { SessionHub } from "@/components/SessionHub";
+import { RaceControlTimeline, RaceControlTimelineSkeleton } from "@/components/RaceControlTimeline";
+import { TyreTracker } from "@/components/TyreTracker";
+import { PitStopDashboard } from "@/components/PitStopDashboard";
+import { ShareCard } from "@/components/ShareCard";
 
 export const Route = createFileRoute("/races/$raceId")({
   head: () => ({
@@ -15,7 +22,11 @@ export const Route = createFileRoute("/races/$raceId")({
   }),
   loader: async ({ context, params }) => {
     const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
-    if (!data.racesById[params.raceId]) throw notFound();
+    const race = data.racesById[params.raceId];
+    if (!race) throw notFound();
+    if (race.status !== "upcoming") {
+      context.queryClient.prefetchQuery(raceDetailQueryOptions(race.round));
+    }
   },
   component: RacePage,
   pendingComponent: DetailSkeleton,
@@ -35,15 +46,13 @@ function RacePage() {
   const c = circuits[r.circuitId];
   const isUpcoming = r.status === "upcoming";
 
-  const sessions: [string, string | undefined][] = [
-    ["FP1", r.sessions.fp1],
-    ["FP2", r.sessions.fp2],
-    ["FP3", r.sessions.fp3],
-    ["Sprint Quali", r.sessions.sprintQuali],
-    ["Sprint", r.sessions.sprint],
-    ["Qualifying", r.sessions.quali],
-    ["Race", r.sessions.race],
-  ];
+  const detail = useRaceDetail(r.round);
+  const driversByNumber = useMemo(
+    () => Object.fromEntries(data.drivers.map((d) => [d.number, d])),
+    [data.drivers],
+  );
+  const teamFor = (d: (typeof data.drivers)[number]) => teamOf(data, d.team);
+
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
@@ -62,9 +71,29 @@ function RacePage() {
           </div>
           <h1 className="mt-1 font-display text-4xl sm:text-6xl leading-none">{r.name}</h1>
           <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{r.officialName}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {r.hasSprint && <Badge><Zap className="h-3 w-3" /> Sprint weekend</Badge>}
             <Badge>{isUpcoming ? "Upcoming" : "Completed"}</Badge>
+            <ShareCard
+              className="ml-auto"
+              eyebrow={`Round ${r.round} · ${c.country}`}
+              title={r.name}
+              subtitle={`${c.name} · ${c.location}`}
+              fileName={`apexo-${r.id}`}
+              stats={
+                r.podium && driversById[r.podium[0]]
+                  ? [
+                      { label: "Winner", value: driversById[r.podium[0]].lastName.toUpperCase() },
+                      { label: "Laps", value: String(c.laps) },
+                      { label: "Length", value: `${c.lengthKm} km` },
+                    ]
+                  : [
+                      { label: "Circuit", value: c.name },
+                      { label: "Laps", value: String(c.laps) },
+                      { label: "Length", value: `${c.lengthKm} km` },
+                    ]
+              }
+            />
           </div>
         </div>
       </header>
@@ -76,23 +105,7 @@ function RacePage() {
       )}
 
       <section className="mt-6 grid gap-6 md:grid-cols-2">
-        <div className="glass rounded-2xl p-6 hover-lift">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            <Timer className="h-3 w-3" /> Weekend schedule
-          </div>
-          <ul className="mt-4 divide-y divide-border">
-            {sessions.map(([label, iso]) =>
-              iso ? (
-                <li key={label} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-                  <span className="text-sm uppercase tracking-widest text-muted-foreground">{label}</span>
-                  <span className={"font-timing tabular-nums text-sm " + (label === "Race" ? "text-gradient-accent text-base" : "text-foreground")}>
-                    <FormattedDate iso={iso} mode="weekday-datetime" />
-                  </span>
-                </li>
-              ) : null,
-            )}
-          </ul>
-        </div>
+        <SessionHub race={r} />
 
 
         <div className="relative overflow-hidden glass rounded-2xl p-6 hover-lift">
@@ -154,6 +167,45 @@ function RacePage() {
             {r.fastestPit && (
               <MiniStat label="Fastest pit" value={`${r.fastestPit.seconds.toFixed(2)}s`} sub={teamOf(data, r.fastestPit.team).name} icon={<Wrench className="h-3 w-3" />} />)}
           </div>
+        </section>
+      )}
+
+      {!isUpcoming && (
+        <section className="mt-8 space-y-6">
+          <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
+            <Timer className="h-3 w-3" /> Race analysis
+          </h2>
+
+          {detail.isLoading ? (
+            <RaceControlTimelineSkeleton />
+          ) : (
+            <>
+              {detail.data?.stints?.length ? (
+                <TyreTracker
+                  stints={detail.data.stints}
+                  totalLaps={c.laps}
+                  driversByNumber={driversByNumber}
+                  teamFor={teamFor}
+                />
+              ) : null}
+
+              {detail.data?.pitStops?.length ? (
+                <PitStopDashboard
+                  pitStops={detail.data.pitStops}
+                  driversById={driversById}
+                  teamFor={teamFor}
+                />
+              ) : null}
+
+              <RaceControlTimeline
+                events={detail.data?.events ?? []}
+                source={detail.data?.eventsSource ?? "none"}
+                driversById={driversById}
+                driversByNumber={driversByNumber}
+                teamFor={teamFor}
+              />
+            </>
+          )}
         </section>
       )}
     </div>
