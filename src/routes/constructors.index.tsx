@@ -1,23 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { constructorStandings, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { ConstructorsSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/constructors/")({
   head: () => ({
     meta: [
-      { title: "F1 Teams 2025 · Apexo" },
-      { name: "description", content: "All ten Formula 1 constructors on the 2025 grid — championships, base, principal, and season standing." },
+      { title: "F1 Teams · Apexo" },
+      { name: "description", content: "Every Formula 1 constructor on the current grid — championships, base, principal, and season standing." },
     ],
   }),
   component: ConstructorsIndex,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+
   pendingComponent: ConstructorsSkeleton,
 });
 
 function ConstructorsIndex() {
+  const { constructorStandings, teams, season } = useSeason();
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-6">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">2025 grid</div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{season} grid</div>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl">The <span className="text-gradient-accent">constructors</span></h1>
       </header>
 

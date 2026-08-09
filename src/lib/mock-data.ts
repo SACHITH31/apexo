@@ -5,18 +5,18 @@ export type TeamId =
   | "williams" | "haas" | "sauber" | "rb";
 
 export interface Team {
-  id: TeamId;
+  id: string;
   name: string;
   fullName: string;
   base: string;
   principal: string;
   color: string; // hex for chart lines / badges
-  themeClass: `theme-${TeamId}`;
+  themeClass: string;
   championships: number;
   founded: number;
 }
 
-export const teams: Record<TeamId, Team> = {
+export const teams: Record<string, Team> = {
   ferrari:  { id: "ferrari",  name: "Ferrari",       fullName: "Scuderia Ferrari HP",         base: "Maranello, Italy",     principal: "Frédéric Vasseur", color: "#DC0000", themeClass: "theme-ferrari",  championships: 16, founded: 1950 },
   mclaren:  { id: "mclaren",  name: "McLaren",       fullName: "McLaren F1 Team",             base: "Woking, UK",           principal: "Andrea Stella",    color: "#FF8000", themeClass: "theme-mclaren",  championships: 9,  founded: 1966 },
   mercedes: { id: "mercedes", name: "Mercedes",      fullName: "Mercedes-AMG Petronas",       base: "Brackley, UK",         principal: "Toto Wolff",       color: "#27F4D2", themeClass: "theme-mercedes", championships: 8,  founded: 1954 },
@@ -38,7 +38,7 @@ export interface Driver {
   nationality: string;
   flag: string;
   dob: string;
-  team: TeamId;
+  team: string;
   championships: number;
   wins: number;
   podiums: number;
@@ -177,10 +177,10 @@ export const driverStandings = [...drivers]
 
 // Constructor standings
 export const constructorStandings = (() => {
-  const map: Record<TeamId, number> = {} as Record<TeamId, number>;
+  const map: Record<string, number> = {};
   drivers.forEach((d) => { map[d.team] = (map[d.team] ?? 0) + d.seasonPoints; });
   return Object.entries(map)
-    .map(([tid, pts]) => ({ team: teams[tid as TeamId], points: pts }))
+    .map(([tid, pts]) => ({ team: teams[tid], points: pts }))
     .sort((a, b) => b.points - a.points)
     .map((e, i) => ({ position: i + 1, ...e }));
 })();

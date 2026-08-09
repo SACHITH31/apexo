@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { teams, type Driver } from "@/lib/mock-data";
+import { type Driver } from "@/lib/mock-data";
+import { teamOf, useSeason } from "@/lib/f1-data";
 
 export function DriverBadge({ driver, size = "md" }: { driver: Driver; size?: "sm" | "md" | "lg" }) {
-  const team = teams[driver.team];
+  const team = teamOf(useSeason(), driver.team);
   const px = size === "sm" ? "h-8 w-8 text-xs" : size === "lg" ? "h-14 w-14 text-lg" : "h-10 w-10 text-sm";
   return (
     <div
@@ -15,7 +16,7 @@ export function DriverBadge({ driver, size = "md" }: { driver: Driver; size?: "s
 }
 
 export function DriverRow({ driver, position, right }: { driver: Driver; position?: number; right?: React.ReactNode }) {
-  const team = teams[driver.team];
+  const team = teamOf(useSeason(), driver.team);
   return (
     <Link
       to="/drivers/$driverId"

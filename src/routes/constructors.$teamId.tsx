@@ -1,21 +1,23 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { constructorStandings, drivers, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { ChevronLeft } from "lucide-react";
 import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/constructors/$teamId")({
   head: ({ params }) => {
-    const t = teams[params.teamId as keyof typeof teams];
+    const name = params.teamId
+      .split("_")
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ");
     return { meta: [
-      { title: t ? `${t.name} · Apexo` : "Team · Apexo" },
-      { name: "description", content: t ? `${t.fullName} — 2025 lineup, championships, and season points.` : "F1 team profile." },
+      { title: `${name} · Apexo` },
+      { name: "description", content: `${name} — current Formula 1 lineup, championships, and season points.` },
     ] };
   },
-  loader: async ({ params }) => {
-    const t = teams[params.teamId as keyof typeof teams];
-    if (!t) throw notFound();
-    return { team: t };
+  loader: async ({ context, params }) => {
+    const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
+    if (!data.teams[params.teamId]) throw notFound();
   },
   component: TeamProfile,
   pendingComponent: DetailSkeleton,
@@ -28,7 +30,10 @@ export const Route = createFileRoute("/constructors/$teamId")({
 });
 
 function TeamProfile() {
-  const { team: t } = Route.useLoaderData();
+  const { teamId } = Route.useParams();
+  const data = useSeason();
+  const { drivers, constructorStandings, season } = data;
+  const t = teamOf(data, teamId);
   const roster = drivers.filter((d) => d.team === t.id);
   const standing = constructorStandings.find((c) => c.team.id === t.id);
 
@@ -46,7 +51,7 @@ function TeamProfile() {
           <h1 className="mt-1 font-display text-4xl sm:text-6xl" style={{ color: t.color }}>{t.name}</h1>
           <p className="mt-2 text-muted-foreground">{t.fullName}</p>
           <dl className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Stat label="P {standing.position}" value={standing?.points ?? 0} unit="pts (2025)" highlight />
+            <Stat label={`P ${standing?.position ?? "-"}`} value={standing?.points ?? 0} unit={`pts (${season})`} highlight />
             <Stat label="Titles" value={t.championships} />
             <Stat label="Founded" value={t.founded} />
             <Stat label="Principal" value={t.principal} textual />
@@ -56,7 +61,7 @@ function TeamProfile() {
       </header>
 
       <section className="mt-8">
-        <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">2025 driver lineup</h2>
+        <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">{season} driver lineup</h2>
         <ul className="grid gap-2 sm:grid-cols-2">
           {roster.map((d) => (
             <DriverRow key={d.id} driver={d} right={<div className="font-timing text-2xl tabular-nums">{d.seasonPoints}</div>} />

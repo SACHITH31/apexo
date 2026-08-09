@@ -1,21 +1,22 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { driversById, races, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { ChevronLeft, Award } from "lucide-react";
 import { DetailSkeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/drivers/$driverId")({
   head: ({ params }) => {
-    const d = driversById[params.driverId];
-    const title = d ? `${d.firstName} ${d.lastName} · Apexo` : "Driver · Apexo";
+    const name = params.driverId
+      .split("_")
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ");
     return { meta: [
-      { title },
-      { name: "description", content: d ? `${d.firstName} ${d.lastName} — ${teams[d.team].name} — 2025 season stats and career record.` : "F1 driver profile." },
+      { title: `${name} · Apexo` },
+      { name: "description", content: `${name} — current Formula 1 season stats, team, and career record.` },
     ] };
   },
-  loader: async ({ params }) => {
-    const d = driversById[params.driverId];
-    if (!d) throw notFound();
-    return { driver: d };
+  loader: async ({ context, params }) => {
+    const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
+    if (!data.driversById[params.driverId]) throw notFound();
   },
   component: DriverProfile,
   pendingComponent: DetailSkeleton,
@@ -28,8 +29,11 @@ export const Route = createFileRoute("/drivers/$driverId")({
 });
 
 function DriverProfile() {
-  const { driver: d } = Route.useLoaderData();
-  const t = teams[d.team as keyof typeof teams];
+  const { driverId } = Route.useParams();
+  const data = useSeason();
+  const { driversById, races, season } = data;
+  const d = driversById[driverId];
+  const t = teamOf(data, d.team);
   const age = new Date(Date.now() - new Date(d.dob).getTime()).getUTCFullYear() - 1970;
 
   const driverRaces = races
@@ -84,7 +88,7 @@ function DriverProfile() {
       </section>
 
       <section className="mt-8">
-        <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">2025 season</h2>
+        <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">{season} season</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <BigStat label="Points" value={d.seasonPoints} />
           <BigStat label="Wins" value={d.seasonWins} />

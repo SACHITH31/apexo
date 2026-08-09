@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { constructorStandings, driverStandings, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { DriverRow } from "@/components/DriverRow";
 import { useState } from "react";
 import { Trophy } from "lucide-react";
@@ -8,15 +8,19 @@ import { StandingsSkeleton } from "@/components/Skeletons";
 export const Route = createFileRoute("/standings")({
   head: () => ({
     meta: [
-      { title: "F1 Standings 2025 · Apexo" },
-      { name: "description", content: "Live 2025 Formula 1 Drivers' and Constructors' championship standings." },
+      { title: "F1 Championship Standings · Apexo" },
+      { name: "description", content: "Live Formula 1 Drivers' and Constructors' championship standings for the current season." },
     ],
   }),
   component: StandingsPage,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+
   pendingComponent: StandingsSkeleton,
 });
 
 function StandingsPage() {
+  const data = useSeason();
+  const { season, driverStandings, constructorStandings, teams } = data;
   const [tab, setTab] = useState<"drivers" | "constructors">("drivers");
   const leader = driverStandings[0]?.driver.seasonPoints ?? 1;
   const leadTeam = constructorStandings[0];
@@ -24,7 +28,7 @@ function StandingsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-6">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">2025 season</div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{season} season</div>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl">Championship <span className="text-gradient-accent">standings</span></h1>
       </header>
 
@@ -34,7 +38,7 @@ function StandingsPage() {
           {[driverStandings[1], driverStandings[0], driverStandings[2]].map((s, ix) => {
             if (!s) return <div key={ix} />;
             const rank = ix === 1 ? 1 : ix === 0 ? 2 : 3;
-            const t = teams[s.driver.team];
+            const t = teamOf(data, s.driver.team);
             const h = rank === 1 ? "h-40" : rank === 2 ? "h-32" : "h-28";
             return (
               <div key={s.driver.id} className={"relative overflow-hidden rounded-xl border p-4 flex flex-col justify-end " + h + " " + (rank === 1 ? "border-accent/60 carbon-texture shadow-broadcast" : "border-border bg-surface/40")}>
@@ -88,7 +92,7 @@ function StandingsPage() {
             const pct = (s.driver.seasonPoints / leader) * 100;
             return (
               <li key={s.driver.id} className="relative animate-slide-up" style={{ animationDelay: `${Math.min(i, 12) * 20}ms` }}>
-                <div className="absolute inset-y-0 left-0 pointer-events-none rounded-lg" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${teams[s.driver.team].color}22, transparent)` }} />
+                <div className="absolute inset-y-0 left-0 pointer-events-none rounded-lg" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${teamOf(data, s.driver.team).color}22, transparent)` }} />
                 <div className="relative">
                   <DriverRow
                     driver={s.driver}

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { circuits, drivers, races, teams } from "@/lib/mock-data";
+import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { Search as SearchIcon } from "lucide-react";
 
 export const Route = createFileRoute("/search")({
@@ -11,9 +11,13 @@ export const Route = createFileRoute("/search")({
     ],
   }),
   component: SearchPage,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+
 });
 
 function SearchPage() {
+  const data = useSeason();
+  const { drivers, teams, circuits, races } = data;
   const [q, setQ] = useState("");
   const query = q.trim().toLowerCase();
 
@@ -26,7 +30,7 @@ function SearchPage() {
     const c = Object.values(circuits).filter((x) => `${x.name} ${x.country} ${x.location}`.toLowerCase().includes(query));
     const r = races.filter((x) => `${x.name} ${x.officialName}`.toLowerCase().includes(query));
     return { d, t, c, r };
-  }, [query]);
+  }, [query, drivers, teams, circuits, races]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-10">
@@ -54,7 +58,7 @@ function SearchPage() {
         <div className="mt-8 space-y-8">
           <Section title="Drivers" empty={results.d.length === 0}>
             {results.d.map((d) => {
-              const t = teams[d.team];
+              const t = teamOf(data, d.team);
               return (
                 <Link key={d.id} to="/drivers/$driverId" params={{ driverId: d.id }} className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 p-3 hover:border-accent/50">
                   <div className="w-1 h-8 rounded-full" style={{ background: t.color }} />

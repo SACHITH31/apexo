@@ -3,10 +3,8 @@ import { ChevronRight, Trophy, Clock, Flag, Sparkles, Zap } from "lucide-react";
 import { LightsOutCountdown } from "@/components/LightsOutCountdown";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { ClientOnly, FormattedDate } from "@/components/ClientOnly";
-import {
-  constructorStandings, driverStandings, driversById, getNextRace, circuits,
-  pickOnThisDay, racesById, teams,
-} from "@/lib/mock-data";
+import { pickOnThisDay, teams as staticTeams } from "@/lib/mock-data";
+import { getNextRaceFrom, seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { useTeamTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/")({
@@ -17,15 +15,22 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: Home,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
 });
 
 function Home() {
-  const nextRace = getNextRace();
+  const season = useSeason();
+  const { circuits, driversById, driverStandings, constructorStandings } = season;
+  const nextRace = getNextRaceFrom(season);
   const circuit = circuits[nextRace.circuitId];
   const otd = pickOnThisDay();
   const { favoriteTeam } = useTeamTheme();
-  const team = teams[favoriteTeam];
-  const favDriver = Object.values(driversById).find((d) => d.team === favoriteTeam);
+  const favThemeClass = staticTeams[favoriteTeam].themeClass;
+  const liveFavTeam = Object.values(season.teams).find((t) => t.themeClass === favThemeClass);
+  const team = liveFavTeam ?? staticTeams[favoriteTeam];
+  const favDriver = Object.values(driversById)
+    .filter((d) => d.team === team.id)
+    .sort((a, b) => b.seasonPoints - a.seasonPoints)[0];
 
   const top3D = driverStandings.slice(0, 3);
   const top3C = constructorStandings.slice(0, 3);
@@ -46,7 +51,7 @@ function Home() {
           <div className="relative">
             <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
-              Round {nextRace.round} · 2025 Season · Up Next
+              Round {nextRace.round} · {season.season} Season · Up Next
             </div>
             <h1 className="mt-2 font-display text-4xl sm:text-6xl leading-none">
               <span className="text-gradient-accent">{nextRace.name.replace(/ GP$/, "")}</span>
@@ -125,7 +130,7 @@ function Home() {
             </div>
           </div>
           <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <Stat label="Season pts" value={constructorStandings.find((c) => c.team.id === favoriteTeam)?.points ?? 0} />
+            <Stat label="Season pts" value={constructorStandings.find((c) => c.team.id === team.id)?.points ?? 0} />
             <Stat label="Championships" value={team.championships} />
             <Stat label="Principal" value={team.principal} small />
             <Stat label="Base" value={team.base} small />
@@ -161,7 +166,7 @@ function Home() {
         >
           <ol className="divide-y divide-border">
             {top3D.map((s) => {
-              const t = teams[s.driver.team];
+              const t = teamOf(season, s.driver.team);
               return (
                 <li key={s.driver.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 group">
                   <div className="font-display text-3xl w-8 text-center transition-colors" style={{ color: s.position === 1 ? "var(--accent)" : undefined }}>
@@ -245,6 +250,8 @@ function SnapshotCard({ title, icon, href, children }: { title: string; icon: Re
 }
 
 function LastRaceCard() {
+  const seasonData = useSeason();
+  const { racesById, circuits, driversById } = seasonData;
   const completed = Object.values(racesById).filter((r) => r.status === "completed");
   const last2 = completed[completed.length - 1];
   if (!last2 || !last2.podium) return null;
@@ -265,9 +272,9 @@ function LastRaceCard() {
       <div className="mt-2 font-display text-2xl">{last2.name}</div>
       <div className="text-xs text-muted-foreground">{c.flag} {c.name}</div>
       <div className="mt-4 grid grid-cols-3 gap-2 relative">
-        {last2.podium.map((did, i) => {
+        {last2.podium.filter((did) => driversById[did]).map((did, i) => {
           const d = driversById[did];
-          const t = teams[d.team];
+          const t = teamOf(seasonData, d.team);
           return (
             <div key={did} className="rounded-lg border border-border bg-surface/50 backdrop-blur-sm p-3">
               <div className="font-display text-xl" style={{ color: i === 0 ? "var(--accent)" : undefined }}>P{i + 1}</div>

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { circuits, races, type Race } from "@/lib/mock-data";
+import { type Race } from "@/lib/mock-data";
+import { seasonQueryOptions, useSeason } from "@/lib/f1-data";
 import { Calendar as CalIcon, MapPin, Timer, Zap } from "lucide-react";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { FormattedDate } from "@/components/ClientOnly";
@@ -8,15 +9,18 @@ import { CalendarSkeleton } from "@/components/Skeletons";
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "2025 F1 Calendar · Apexo" },
-      { name: "description", content: "The full 24-round Formula 1 2025 season schedule with session times in your local timezone." },
+      { title: "F1 Race Calendar · Apexo" },
+      { name: "description", content: "The full Formula 1 season schedule with session times in your local timezone." },
     ],
   }),
   component: CalendarPage,
+  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+
   pendingComponent: CalendarSkeleton,
 });
 
 function CalendarPage() {
+  const { season, races, circuits } = useSeason();
   const now = Date.now();
   const nextIdx = races.findIndex((r) => new Date(r.sessions.race).getTime() > now);
   const completedCount = races.filter((r) => r.status === "completed").length;
@@ -26,13 +30,13 @@ function CalendarPage() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-10 relative">
         <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
-          <CalIcon className="h-3 w-3" /> 2025 Season
+          <CalIcon className="h-3 w-3" /> {season} Season
         </div>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl">
           Race <span className="text-gradient-accent">calendar</span>
         </h1>
         <p className="mt-2 text-muted-foreground max-w-xl">
-          24 rounds. All times shown in your local timezone. Sprint weekends flagged in red.
+          {races.length} rounds. All times shown in your local timezone. Sprint weekends flagged in red.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Chip>{completedCount} completed</Chip>
@@ -64,6 +68,7 @@ function Chip({ children, highlight }: { children: React.ReactNode; highlight?: 
 }
 
 function RaceCard({ race, isNext, index }: { race: Race; isNext: boolean; index: number }) {
+  const { circuits } = useSeason();
   const c = circuits[race.circuitId];
   const raceDate = new Date(race.sessions.race);
   const isPast = raceDate.getTime() < Date.now();
