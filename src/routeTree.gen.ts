@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -37,6 +38,11 @@ const StandingsRoute = StandingsRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaygroundRoute = PlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GlossaryRoute = GlossaryRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
+  '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
+  '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
+  '/playground': typeof PlaygroundRoute
   '/search': typeof SearchRoute
   '/standings': typeof StandingsRoute
   '/statistics': typeof StatisticsRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/compare'
     | '/glossary'
+    | '/playground'
     | '/search'
     | '/standings'
     | '/statistics'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/compare'
     | '/glossary'
+    | '/playground'
     | '/search'
     | '/standings'
     | '/statistics'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/compare'
     | '/glossary'
+    | '/playground'
     | '/search'
     | '/standings'
     | '/statistics'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   CompareRoute: typeof CompareRoute
   GlossaryRoute: typeof GlossaryRoute
+  PlaygroundRoute: typeof PlaygroundRoute
   SearchRoute: typeof SearchRoute
   StandingsRoute: typeof StandingsRoute
   StatisticsRoute: typeof StatisticsRoute
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playground': {
+      id: '/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof PlaygroundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/glossary': {
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   CompareRoute: CompareRoute,
   GlossaryRoute: GlossaryRoute,
+  PlaygroundRoute: PlaygroundRoute,
   SearchRoute: SearchRoute,
   StandingsRoute: StandingsRoute,
   StatisticsRoute: StatisticsRoute,
@@ -334,3 +355,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
