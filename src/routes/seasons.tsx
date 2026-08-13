@@ -50,6 +50,11 @@ function SeasonComparePage() {
   const [a, setA] = useState(String(Number(now) - 1));
   const [b, setB] = useState(now);
 
+  const options = useMemo(() => {
+    const set = new Set<string>([...seasons, a, b]);
+    return [...set].sort((x, y) => Number(y) - Number(x));
+  }, [seasons, a, b]);
+
   const [qa, qb] = useQueries({
     queries: [seasonStatsQueryOptions(a), seasonStatsQueryOptions(b)],
   });
@@ -88,9 +93,9 @@ function SeasonComparePage() {
       </header>
 
       <section className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl glass-elevated border border-border/60 p-4">
-        <SeasonPicker label="Season A" value={a} onChange={setA} options={seasons} />
+        <SeasonPicker label="Season A" value={a} onChange={setA} options={options} />
         <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
-        <SeasonPicker label="Season B" value={b} onChange={setB} options={seasons} />
+        <SeasonPicker label="Season B" value={b} onChange={setB} options={options} />
         <button
           type="button"
           onClick={() => { setA(b); setB(a); }}
