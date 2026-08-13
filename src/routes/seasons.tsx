@@ -16,7 +16,7 @@ import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { seasonStatsQueryOptions } from "@/lib/f1-extra-data";
 import { compareMetrics, summarizeSeason } from "@/lib/season-compare";
 import { currentSeason, useAvailableSeasons } from "@/lib/season";
-import { PageSkeleton, ChartSkeleton } from "@/components/Skeletons";
+import { PageSkeleton, Skeleton } from "@/components/Skeletons";
 
 export const Route = createFileRoute("/seasons")({
   head: () => ({
@@ -102,7 +102,8 @@ function SeasonComparePage() {
 
       {!ready ? (
         <div className="mt-6 space-y-4">
-          <ChartSkeleton />
+          <Skeleton className="h-72 w-full rounded-2xl" />
+          <Skeleton className="h-72 w-full rounded-2xl" />
         </div>
       ) : (
         <>
