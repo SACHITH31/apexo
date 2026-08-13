@@ -15,6 +15,7 @@ import { AppShell } from "../components/AppShell";
 import { ThemeProvider } from "../lib/theme";
 import { LiveAlertsProvider } from "../lib/live-alerts";
 import { LiveAlerts } from "../components/LiveAlerts";
+import { SeasonProvider } from "../lib/season";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <SeasonProvider>
         <LiveAlertsProvider>
           <AppShell>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -139,6 +141,7 @@ function RootComponent() {
           </AppShell>
           <LiveAlerts />
         </LiveAlertsProvider>
+        </SeasonProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
