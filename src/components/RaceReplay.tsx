@@ -247,7 +247,7 @@ export function RaceReplay({
                         className="shrink-0 rounded-full border px-1.5 text-[9px] uppercase tracking-widest"
                         style={{ borderColor: COMPOUND_COLOR[o.compound] ?? "var(--border)", color: COMPOUND_COLOR[o.compound] ?? undefined }}
                       >
-                        {o.compound.slice(0, 1)}
+                        {o.compound === "UNKNOWN" ? "?" : o.compound.slice(0, 1)}
                         {o.tyreAge}
                       </span>
                     )}
