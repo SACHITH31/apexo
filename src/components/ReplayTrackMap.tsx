@@ -30,20 +30,24 @@ export function ReplayTrackMap({
 }: Props) {
   const d = useMemo(() => buildCircuitPath(circuitId), [circuitId]);
   const pathRef = useRef<SVGPathElement | null>(null);
+  const markerRef = useRef<SVGGElement | null>(null);
   const [len, setLen] = useState(0);
-  const [pt, setPt] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const el = pathRef.current;
     if (!el) return;
-    setLen(el.getTotalLength());
+    const total = el.getTotalLength();
+    setLen((prev) => (Math.abs(prev - total) < 0.5 ? prev : total));
   }, [d]);
 
+  // Move the marker imperatively so playback never triggers a React update.
   useEffect(() => {
     const el = pathRef.current;
-    if (!el || !len) return;
-    const p = el.getPointAtLength(((lapProgress % 1) + 1) % 1 * len);
-    setPt({ x: p.x, y: p.y });
+    const marker = markerRef.current;
+    if (!el || !marker || !len) return;
+    const f = (((lapProgress % 1) + 1) % 1) * len;
+    const p = el.getPointAtLength(f);
+    marker.setAttribute("transform", `translate(${p.x} ${p.y})`);
   }, [lapProgress, len]);
 
   const statusColor = EVENT_STYLE[trackStatus]?.color ?? "var(--track-green)";
@@ -64,7 +68,7 @@ export function ReplayTrackMap({
       <svg viewBox="0 0 200 120" className="mt-3 w-full" role="img" aria-label="Animated circuit map">
         {len > 0 && (
           <>
-            <path d={d} ref={undefined} stroke="var(--track-green)" strokeWidth={7} fill="none" opacity={0.08} strokeLinecap="round" />
+            <path d={d} stroke="var(--track-green)" strokeWidth={7} fill="none" opacity={0.08} strokeLinecap="round" />
             {[0, 1, 2].map((i) => (
               <path
                 key={i}
@@ -115,7 +119,7 @@ export function ReplayTrackMap({
           })}
 
         {/* Car marker */}
-        <g style={{ transform: `translate(${pt.x}px, ${pt.y}px)` }}>
+        <g ref={markerRef}>
           <circle r={7} fill={leaderColor ?? "var(--accent)"} opacity={0.22} />
           <circle r={3.2} fill={leaderColor ?? "var(--accent)"} />
         </g>
