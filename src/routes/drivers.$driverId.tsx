@@ -117,7 +117,10 @@ function DriverProfile() {
         </div>
       </header>
 
+      <SeasonBadges stats={stats} driverId={d.id} />
+
       <section className="mt-8">
+
         <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">Career</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <BigStat label="Titles" value={d.championships} highlight={d.championships > 0} />
