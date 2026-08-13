@@ -236,16 +236,8 @@ function RacePage() {
                 />
               ) : null}
 
-              <RaceReplay
-                race={r}
-                circuitId={c.id}
-                circuitLaps={c.laps}
-                drsZones={c.drsZones}
-                detail={detail.data}
-                driversById={driversById}
-                driversByNumber={driversByNumber}
-                teamFor={teamFor}
-              />
+
+
 
               <RaceControlTimeline
                 events={detail.data?.events ?? []}
