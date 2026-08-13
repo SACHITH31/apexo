@@ -417,7 +417,7 @@ export async function fetchRaceDetail(year: string, round: number): Promise<Race
 
   const raceNode: AnyJson | undefined = resultsPayload?.MRData?.RaceTable?.Races?.[0];
   const season: string = String(
-    raceNode?.season ?? resultsPayload?.MRData?.RaceTable?.season ?? new Date().getUTCFullYear(),
+    raceNode?.season ?? resultsPayload?.MRData?.RaceTable?.season ?? year,
   );
   const raceDate: string = String(raceNode?.date ?? "");
 
