@@ -137,8 +137,8 @@ export function LiveAlertsProvider({ children }: { children: ReactNode }) {
   }, [alerts.length]);
 
   const value = useMemo(
-    () => ({ alerts, banner, push, dismiss, clear }),
-    [alerts, banner, push, dismiss, clear],
+    () => ({ alerts, banner, push, dismiss, clear, settings, updateSettings }),
+    [alerts, banner, push, dismiss, clear, settings, updateSettings],
   );
 
   return <AlertsContext.Provider value={value}>{children}</AlertsContext.Provider>;
@@ -148,8 +148,17 @@ export function useLiveAlerts(): AlertsApi {
   const ctx = useContext(AlertsContext);
   if (ctx) return ctx;
   // Safe no-op so components can be rendered outside the provider (tests, SSR).
-  return { alerts: [], banner: null, push: () => {}, dismiss: () => {}, clear: () => {} };
+  return {
+    alerts: [],
+    banner: null,
+    push: () => {},
+    dismiss: () => {},
+    clear: () => {},
+    settings: DEFAULT_ALERT_SETTINGS,
+    updateSettings: () => {},
+  };
 }
+
 
 export function alertColor(kind: AlertKind): string {
   if (kind === "session") return "var(--accent)";
