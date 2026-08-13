@@ -31,13 +31,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 glass border-b border-border/50">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2.5 group">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:px-6">
+          <Link to="/" className="flex shrink-0 items-center gap-2.5 group">
             <LogoMark />
             <span className="font-display text-2xl tracking-widest">APEXO</span>
           </Link>
 
-          <nav className="ml-6 hidden lg:flex items-center gap-1">
+          <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 overflow-x-auto no-scrollbar">
+
             {nav.map((n) => (
               <Link
                 key={n.to}
