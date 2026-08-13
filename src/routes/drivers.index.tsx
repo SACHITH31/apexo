@@ -33,7 +33,7 @@ function DriversPage() {
       </header>
       <ul className="grid gap-2 sm:grid-cols-2">
         {sorted.map((d, i) => (
-          <li key={d.id} className="animate-slide-up" style={{ animationDelay: `${Math.min(i, 12) * 25}ms` }}>
+          <li key={d.id} className="min-w-0 animate-slide-up" style={{ animationDelay: `${Math.min(i, 12) * 25}ms` }}>
             <DriverRow
               driver={d}
               right={

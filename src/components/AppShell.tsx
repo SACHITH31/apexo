@@ -29,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { favoriteTeam, setFavoriteTeam } = useTeamTheme();
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen w-full min-w-0 flex-col">
       <header className="sticky top-0 z-40 glass border-b border-border/50">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link to="/" className="flex shrink-0 items-center gap-2.5 group">
@@ -85,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
             <button
-              className="lg:hidden p-2 rounded-md hover:bg-surface"
+              className="lg:hidden shrink-0 p-2 rounded-md hover:bg-surface"
               onClick={() => setOpen((v) => !v)}
               aria-label="Menu"
             >
@@ -129,12 +129,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <OfflineBanner />
 
-      <main className="flex-1 pb-20 lg:pb-0 tap-highlight-none">
+      <main className="w-full min-w-0 flex-1 pb-20 lg:pb-0 tap-highlight-none">
         <PageTransition>{children}</PageTransition>
       </main>
 
       <footer className="border-t border-border/50 mt-12 pb-20 lg:pb-0">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 text-xs text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 text-xs text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2">
           <span className="font-display tracking-widest text-sm text-foreground">APEXO</span>
           <span>Unofficial F1 companion. Not affiliated with the FIA or Formula One Group.</span>
           <span className="ml-auto">Data placeholders — live sync coming soon.</span>
