@@ -60,28 +60,29 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex min-w-0 shrink items-center gap-2">
             <Link
               to="/search"
-              className="hidden sm:flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors min-w-52"
+              className="hidden sm:flex min-w-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors w-52 max-w-full"
             >
-              <Search className="h-3.5 w-3.5" />
-              <span>Search drivers, races…</span>
+              <Search className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Search drivers, races…</span>
             </Link>
-            <Link to="/search" className="sm:hidden p-2 rounded-md hover:bg-surface" aria-label="Search">
+            <Link to="/search" className="sm:hidden shrink-0 p-2 rounded-md hover:bg-surface" aria-label="Search">
               <Search className="h-5 w-5" />
             </Link>
 
             <select
               value={favoriteTeam}
               onChange={(e) => setFavoriteTeam(e.target.value as never)}
-              className="hidden md:block rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:border-accent/50 focus:border-accent outline-none transition-colors"
+              className="hidden md:block min-w-0 max-w-40 shrink truncate rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:border-accent/50 focus:border-accent outline-none transition-colors"
               aria-label="Favorite team accent color"
             >
               {Object.values(teams).map((t) => (
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>
+
 
             <button
               className="lg:hidden p-2 rounded-md hover:bg-surface"
