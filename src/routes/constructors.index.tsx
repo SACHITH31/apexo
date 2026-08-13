@@ -26,7 +26,7 @@ function ConstructorsIndex() {
 
       <ul className="grid gap-3 sm:grid-cols-2">
         {constructorStandings.map((s) => (
-          <li key={s.team.id}>
+          <li key={s.team.id} className="min-w-0">
             <Link
               to="/constructors/$teamId"
               params={{ teamId: s.team.id }}

@@ -193,8 +193,8 @@ function SimulatorPage() {
         })}
       </nav>
 
-      <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <section className="relative overflow-hidden glass rounded-2xl p-5 sm:p-6">
+      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <section className="relative min-w-0 overflow-hidden glass rounded-2xl p-5 sm:p-6">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px accent-line opacity-60" />
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             <Flag className="h-3 w-3" /> Finishing order · {race.name}
@@ -220,7 +220,7 @@ function SimulatorPage() {
           )}
         </section>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <StandingsPanel
             title={`Drivers after R${race.round}`}
             rows={(projection?.drivers ?? []).slice(0, 10).map((row) => {
@@ -246,7 +246,7 @@ function SimulatorPage() {
           />
 
           {final && (
-            <section className="relative overflow-hidden glass rounded-2xl p-5 sm:p-6">
+            <section className="relative min-w-0 overflow-hidden glass rounded-2xl p-5 sm:p-6">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px accent-line opacity-60" />
               <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 <Trophy className="h-3 w-3" /> Projected champions
@@ -307,7 +307,7 @@ function OrderEditor({
               id={`${label}-${i}`}
               value={values[i] ?? ""}
               onChange={(e) => onChange(i, e.target.value || null)}
-              className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+              className="min-h-11 w-full min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
             >
               <option value="">—</option>
               {drivers.map((d) => (
@@ -335,7 +335,7 @@ function StandingsPanel({
 }) {
   if (!rows.length) return null;
   return (
-    <section className="relative overflow-hidden glass rounded-2xl p-5 sm:p-6">
+    <section className="relative min-w-0 overflow-hidden glass rounded-2xl p-5 sm:p-6">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px accent-line opacity-60" />
       <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
         {title}
