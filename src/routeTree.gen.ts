@@ -15,6 +15,7 @@ import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as SeasonStoryRouteImport } from './routes/season-story'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RecordsRouteImport } from './routes/records'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as CompareRouteImport } from './routes/compare'
@@ -57,6 +58,11 @@ const SeasonStoryRoute = SeasonStoryRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordsRoute = RecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
+  '/records': typeof RecordsRoute
   '/search': typeof SearchRoute
   '/season-story': typeof SeasonStoryRoute
   '/simulator': typeof SimulatorRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
+  '/records': typeof RecordsRoute
   '/search': typeof SearchRoute
   '/season-story': typeof SeasonStoryRoute
   '/simulator': typeof SimulatorRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
+  '/records': typeof RecordsRoute
   '/search': typeof SearchRoute
   '/season-story': typeof SeasonStoryRoute
   '/simulator': typeof SimulatorRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/glossary'
     | '/playground'
+    | '/records'
     | '/search'
     | '/season-story'
     | '/simulator'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/glossary'
     | '/playground'
+    | '/records'
     | '/search'
     | '/season-story'
     | '/simulator'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/glossary'
     | '/playground'
+    | '/records'
     | '/search'
     | '/season-story'
     | '/simulator'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   CompareRoute: typeof CompareRoute
   GlossaryRoute: typeof GlossaryRoute
   PlaygroundRoute: typeof PlaygroundRoute
+  RecordsRoute: typeof RecordsRoute
   SearchRoute: typeof SearchRoute
   SeasonStoryRoute: typeof SeasonStoryRoute
   SimulatorRoute: typeof SimulatorRoute
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records': {
+      id: '/records'
+      path: '/records'
+      fullPath: '/records'
+      preLoaderRoute: typeof RecordsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playground': {
@@ -422,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompareRoute: CompareRoute,
   GlossaryRoute: GlossaryRoute,
   PlaygroundRoute: PlaygroundRoute,
+  RecordsRoute: RecordsRoute,
   SearchRoute: SearchRoute,
   SeasonStoryRoute: SeasonStoryRoute,
   SimulatorRoute: SimulatorRoute,
