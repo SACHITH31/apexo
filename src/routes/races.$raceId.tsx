@@ -116,10 +116,30 @@ function RacePage() {
         </section>
       )}
 
+      {!isUpcoming && (
+        <section className="mt-6 animate-slide-up" style={{ animationDelay: "60ms" }}>
+          {detail.isLoading ? (
+            <RaceControlTimelineSkeleton />
+          ) : (
+            <RaceReplay
+              race={r}
+              circuitId={c.id}
+              circuitLaps={c.laps}
+              drsZones={c.drsZones}
+              detail={detail.data}
+              driversById={driversById}
+              driversByNumber={driversByNumber}
+              teamFor={teamFor}
+            />
+          )}
+        </section>
+      )}
+
       <div className="mt-6 space-y-6">
         <LiveTrackStatus race={r} circuitId={c.id} events={detail.data?.events ?? []} />
         <WeatherCenter race={r} circuitId={c.id} />
       </div>
+
 
 
 
