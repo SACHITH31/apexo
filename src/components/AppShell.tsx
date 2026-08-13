@@ -43,10 +43,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
-                className="px-3 py-1.5 text-sm font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors relative"
+                className="shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors relative"
                 activeProps={{ className: "text-foreground" }}
                 activeOptions={{ exact: n.to === "/" }}
               >
+
                 {({ isActive }) => (
                   <>
                     {n.label}
