@@ -7,6 +7,7 @@ import { DetailSkeleton } from "@/components/Skeletons";
 import { bioFor } from "@/lib/driver-career";
 import { CareerTimeline } from "@/components/CareerTimeline";
 import { DnaPanel } from "@/components/DnaRadar";
+import { SeasonBadges } from "@/components/SeasonBadges";
 import { driverDna } from "@/lib/f1-dna";
 import { ProShareCard } from "@/components/ProShareCard";
 
