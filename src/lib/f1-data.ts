@@ -2,27 +2,32 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import type { SeasonData } from "./f1.server";
 import { getSeasonData } from "./f1.functions";
 import { mockSeasonData } from "./f1-fallback";
+import { currentSeason, useSeasonSelection } from "./season";
 
 export type { SeasonData };
 
-export const seasonQueryOptions = () =>
+export const seasonQueryOptions = (season: string = currentSeason()) =>
   queryOptions({
-    queryKey: ["f1", "season"],
+    queryKey: ["f1", "season", season],
     staleTime: 10 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 1,
     queryFn: async (): Promise<SeasonData> => {
       try {
-        return (await getSeasonData()) as SeasonData;
+        return (await getSeasonData({ data: { season } })) as SeasonData;
       } catch {
-        return mockSeasonData();
+        return { ...mockSeasonData(), season };
       }
     },
   });
 
-/** Season data for the current F1 season, live with local fallback. */
-export function useSeason(): SeasonData {
-  return useSuspenseQuery(seasonQueryOptions()).data;
+/**
+ * Season data for the globally selected season. Pass `override` to read a
+ * specific season (deep-linked race pages) regardless of the selection.
+ */
+export function useSeason(override?: string): SeasonData {
+  const { season } = useSeasonSelection();
+  return useSuspenseQuery(seasonQueryOptions(override ?? season)).data;
 }
 
 /** Resolve a team by id with a safe fallback for unknown constructors. */
