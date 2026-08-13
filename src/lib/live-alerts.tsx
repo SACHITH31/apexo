@@ -27,12 +27,34 @@ export interface LiveAlert {
   ttl?: number;
 }
 
+export interface AlertSettings {
+  /** Master switch for in-app alerts. */
+  enabled: boolean;
+  /** Minimum severity that is shown (0 shows everything). */
+  minSeverity: 0 | 1 | 2 | 3;
+  /** Critical alerts pin a banner at the top of the app. */
+  banners: boolean;
+  /** Kinds the user has muted. */
+  muted: AlertKind[];
+}
+
+export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
+  enabled: true,
+  minSeverity: 0,
+  banners: true,
+  muted: [],
+};
+
+const SETTINGS_KEY = "apexo:alert-settings";
+
 interface AlertsApi {
   alerts: LiveAlert[];
   banner: LiveAlert | null;
   push: (a: Omit<LiveAlert, "id" | "createdAt"> & { ttl?: number }) => void;
   dismiss: (id: string) => void;
   clear: () => void;
+  settings: AlertSettings;
+  updateSettings: (patch: Partial<AlertSettings>) => void;
 }
 
 const AlertsContext = createContext<AlertsApi | null>(null);
@@ -44,7 +66,32 @@ const MAX_VISIBLE = 3;
 export function LiveAlertsProvider({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<LiveAlert[]>([]);
   const [banner, setBanner] = useState<LiveAlert | null>(null);
+  const [settings, setSettings] = useState<AlertSettings>(DEFAULT_ALERT_SETTINGS);
   const lastSeen = useRef<Map<string, number>>(new Map());
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+
+  // Hydrate persisted preferences after mount (keeps SSR output stable).
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(SETTINGS_KEY);
+      if (raw) setSettings({ ...DEFAULT_ALERT_SETTINGS, ...JSON.parse(raw) });
+    } catch {
+      /* ignore unreadable storage */
+    }
+  }, []);
+
+  const updateSettings = useCallback((patch: Partial<AlertSettings>) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...patch };
+      try {
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore unwritable storage */
+      }
+      return next;
+    });
+  }, []);
 
   const dismiss = useCallback((id: string) => {
     setAlerts((list) => list.filter((a) => a.id !== id));
@@ -52,6 +99,11 @@ export function LiveAlertsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const push = useCallback<AlertsApi["push"]>((input) => {
+    const s = settingsRef.current;
+    if (!s.enabled) return;
+    if (input.severity < s.minSeverity) return;
+    if (s.muted.includes(input.kind)) return;
+
     const now = Date.now();
     const previous = lastSeen.current.get(input.key) ?? 0;
     if (now - previous < THROTTLE_MS) return;
@@ -65,8 +117,9 @@ export function LiveAlertsProvider({ children }: { children: ReactNode }) {
     };
 
     setAlerts((list) => [alert, ...list].slice(0, MAX_VISIBLE));
-    if (alert.severity >= 2) setBanner(alert);
+    if (alert.severity >= 2 && s.banners) setBanner(alert);
   }, []);
+
 
   const clear = useCallback(() => {
     setAlerts([]);
