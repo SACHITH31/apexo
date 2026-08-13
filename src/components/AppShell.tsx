@@ -6,6 +6,7 @@ import { teams } from "@/lib/mock-data";
 import { PageTransition } from "./PageTransition";
 import { OfflineBanner } from "./OfflineBanner";
 import { BottomNav } from "./BottomNav";
+import { AlertsSettings } from "./AlertsSettings";
 
 const nav = [
   { to: "/",              label: "Home" },
@@ -83,6 +84,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
             </select>
 
+
+            <AlertsSettings />
 
             <button
               className="lg:hidden shrink-0 p-2 rounded-md hover:bg-surface"
