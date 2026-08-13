@@ -5,9 +5,13 @@ import {
   ChevronRight,
   CloudRain,
   Gauge,
+  Maximize2,
+  Minimize2,
   Pause,
   Play,
   RotateCcw,
+  SkipBack,
+  SkipForward,
   Thermometer,
   Wind,
   Wrench,
@@ -16,11 +20,14 @@ import type { Driver, Race } from "@/lib/mock-data";
 import type { RaceDetail } from "@/lib/f1-extra.server";
 import { buildReplay, weatherAtLap } from "@/lib/replay";
 import { EVENT_STYLE } from "@/lib/race-events";
-import { ReplayTrackMap } from "./ReplayTrackMap";
+import { ReplayTrackMap, type TrackCar } from "./ReplayTrackMap";
+import { RaceBattle } from "./RaceBattle";
+import { computeInsights } from "@/lib/race-insights";
 import { useRaceWeather, weatherSessionsOf } from "@/lib/weather-data";
 
-const SPEEDS = [1, 2, 5, 10] as const;
+const SPEEDS = [0.25, 0.5, 1, 2, 5, 10] as const;
 const LAP_MS = 2200; // one replay lap at 1x
+const LAP_SECONDS = 92; // reference lap time used to space cars around the map
 
 const COMPOUND_COLOR: Record<string, string> = {
   SOFT: "var(--track-red)",
@@ -42,9 +49,10 @@ interface Props {
 }
 
 /**
- * Interactive race replay — scrub or play a completed race lap by lap with a
- * live leaderboard, tyre state, pit window, race control feed and evolving
- * weather. Reconstructed from results data, never from race footage.
+ * Immersive race viewer — one engine for live and completed races. Scrub or
+ * play the race lap by lap with every car animated on the circuit, a live
+ * leaderboard, tyre state, pit window, race control feed, deterministic
+ * insights and battle mode. Reconstructed from timing data, never footage.
  */
 export function RaceReplay({
   race,
@@ -64,8 +72,13 @@ export function RaceReplay({
   const [progress, setProgress] = useState(1); // continuous lap position
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(2);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [theatre, setTheatre] = useState(false);
+  const [battle, setBattle] = useState<{ a: string; b: string } | null>(null);
   const raf = useRef<number | null>(null);
   const last = useRef<number>(0);
+  const feedRef = useRef<HTMLUListElement | null>(null);
+  const rootRef = useRef<HTMLElement | null>(null);
 
   const total = model.totalLaps;
 
@@ -94,7 +107,7 @@ export function RaceReplay({
     };
   }, [playing, speed, total]);
 
-  const lapIndex = Math.max(1, Math.min(total, Math.floor(progress)));
+  const lapIndex = Math.max(1, Math.min(total || 1, Math.floor(progress)));
   const state = model.laps[lapIndex - 1];
   const lapProgress = progress - Math.floor(progress);
 
@@ -102,17 +115,110 @@ export function RaceReplay({
   const baseWeather = weather.data?.sessions.find((s) => s.key === "race");
   const wx = weatherAtLap(lapIndex, total, baseWeather as never);
 
-  const keyMoments = useMemo(
-    () =>
-      model.events
-        .filter((e) => ["start", "sc", "vsc", "red", "penalty", "fastest-lap", "chequered"].includes(e.kind))
-        .slice(0, 14),
+  const jump = useCallback(
+    (lap: number) => setProgress(Math.max(1, Math.min(total || 1, lap))),
+    [total],
+  );
+
+  const timelineEvents = useMemo(
+    () => model.events.filter((e) => e.kind !== "info").slice(0, 60),
     [model.events],
   );
 
-  const jump = useCallback((lap: number) => {
-    setProgress(Math.max(1, lap));
-  }, []);
+  const step = useCallback(
+    (dir: 1 | -1) => {
+      const laps = timelineEvents.map((e) => e.lap ?? 1);
+      const next =
+        dir === 1
+          ? laps.find((l) => l > lapIndex) ?? total
+          : [...laps].reverse().find((l) => l < lapIndex) ?? 1;
+      setPlaying(false);
+      jump(next);
+    },
+    [timelineEvents, lapIndex, total, jump],
+  );
+
+  // Keyboard shortcuts: space play/pause, arrows scrub and change speed.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return;
+      if (!rootRef.current) return;
+      switch (e.key) {
+        case " ":
+          e.preventDefault();
+          setPlaying((p) => !p);
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          setPlaying(false);
+          jump(lapIndex - 1);
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          setPlaying(false);
+          jump(lapIndex + 1);
+          break;
+        case "ArrowUp":
+        case "ArrowDown": {
+          e.preventDefault();
+          const i = SPEEDS.indexOf(speed);
+          const nextI = Math.max(0, Math.min(SPEEDS.length - 1, i + (e.key === "ArrowUp" ? 1 : -1)));
+          setSpeed(SPEEDS[nextI]);
+          break;
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [jump, lapIndex, speed]);
+
+  // Auto scroll the feed to the newest event.
+  useEffect(() => {
+    feedRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [lapIndex]);
+
+  const insights = useMemo(
+    () =>
+      computeInsights(
+        model,
+        detail,
+        (id) => driversById[id]?.lastName ?? id,
+        (id) => {
+          const d = Object.values(driversById).find((x) => x.team === id);
+          return d ? teamFor(d).name : id.replace(/_/g, " ");
+        },
+      ),
+    [model, detail, driversById, teamFor],
+  );
+
+  const cars: TrackCar[] = useMemo(() => {
+    if (!state) return [];
+    return state.order
+      .filter((o) => !o.retired)
+      .map((o) => {
+        const d = driversById[o.driverId];
+        return {
+          driverId: o.driverId,
+          code: d?.code ?? o.driverId.slice(0, 3).toUpperCase(),
+          color: d ? teamFor(d).color : "var(--accent)",
+          frac: lapProgress - o.gapSec / LAP_SECONDS,
+          position: o.position,
+          retired: o.retired,
+          pitting: o.pitting,
+        };
+      });
+  }, [state, lapProgress, driversById, teamFor]);
+
+  const candidates = useMemo(
+    () => (state?.order ?? []).map((o) => o.driverId).filter((id) => driversById[id]),
+    [state, driversById],
+  );
+
+  useEffect(() => {
+    if (battle || candidates.length < 2) return;
+    setBattle({ a: candidates[0], b: candidates[1] });
+  }, [battle, candidates]);
 
   if (!model.available || !state) {
     return (
@@ -122,26 +228,47 @@ export function RaceReplay({
     );
   }
 
-  const leader = state.order[0];
-  const leaderDriver = leader ? driversById[leader.driverId] : undefined;
-  const leaderColor = leaderDriver ? teamFor(leaderDriver).color : undefined;
-  const feed = model.events.filter((e) => (e.lap ?? 1) <= lapIndex).slice(-6).reverse();
+  const feed = model.events.filter((e) => (e.lap ?? 1) <= lapIndex).slice(-40).reverse();
+  const sel = selected ? state.order.find((o) => o.driverId === selected) : undefined;
+  const selDriver = sel ? driversById[sel.driverId] : undefined;
+  const selStops = sel ? model.pitStops.filter((p) => p.driverId === sel.driverId && p.lap <= lapIndex) : [];
 
   return (
-    <section className="space-y-4">
+    <section
+      ref={rootRef}
+      className={
+        "space-y-4 " +
+        (theatre
+          ? "fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-xl p-4 sm:p-6"
+          : "")
+      }
+    >
       <div className="glass rounded-2xl p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Race replay</div>
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Race viewer</div>
           <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
-            Reconstructed
+            {race.status === "live" ? "Live" : "Reconstructed"}
           </span>
+          <button
+            type="button"
+            onClick={() => setTheatre((t) => !t)}
+            className="rounded-full border border-border p-1.5 text-muted-foreground hover:text-foreground"
+            aria-label={theatre ? "Exit theatre mode" : "Theatre mode"}
+          >
+            {theatre ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+          </button>
           <div className="ml-auto font-timing tabular-nums text-2xl">
             L{String(lapIndex).padStart(2, "0")}
             <span className="text-muted-foreground text-base">/{total}</span>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div
+          className={
+            "mt-4 flex flex-wrap items-center gap-2 transition-opacity duration-300 " +
+            (playing ? "opacity-45 hover:opacity-100 focus-within:opacity-100" : "opacity-100")
+          }
+        >
           <button
             type="button"
             onClick={() => {
@@ -153,15 +280,35 @@ export function RaceReplay({
             {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
             {playing ? "Pause" : "Play"}
           </button>
-          <button type="button" onClick={() => jump(lapIndex - 1)} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Previous lap">
+          <button type="button" onClick={() => step(-1)} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Previous event">
+            <SkipBack className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => { setPlaying(false); jump(lapIndex - 1); }} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Previous lap">
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => jump(lapIndex + 1)} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Next lap">
+          <button type="button" onClick={() => { setPlaying(false); jump(lapIndex + 1); }} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Next lap">
             <ChevronRight className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => step(1)} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Next event">
+            <SkipForward className="h-4 w-4" />
           </button>
           <button type="button" onClick={() => { setPlaying(false); setProgress(1); }} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground" aria-label="Restart">
             <RotateCcw className="h-4 w-4" />
           </button>
+
+          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+            Lap
+            <input
+              type="number"
+              min={1}
+              max={total}
+              value={lapIndex}
+              onChange={(e) => { setPlaying(false); jump(Number(e.target.value)); }}
+              className="w-16 rounded-full border border-border bg-surface/60 px-2 py-1 font-timing tabular-nums text-xs text-foreground"
+              aria-label="Jump to lap"
+            />
+          </label>
+
           <div className="ml-auto flex items-center gap-1">
             {SPEEDS.map((s) => (
               <button
@@ -192,21 +339,35 @@ export function RaceReplay({
           className="mt-4 w-full accent-[var(--accent)]"
         />
 
-        {keyMoments.length > 0 && (
-          <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
-            {keyMoments.map((e) => (
-              <button
-                key={e.id}
-                type="button"
-                onClick={() => { setPlaying(false); jump(e.lap ?? 1); }}
-                className="shrink-0 rounded-full border border-border bg-surface/50 px-3 py-1 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
-                style={{ borderColor: EVENT_STYLE[e.kind].color }}
-              >
-                L{e.lap ?? 1} · {EVENT_STYLE[e.kind].label}
-              </button>
-            ))}
+        {/* Interactive event timeline */}
+        {timelineEvents.length > 0 && (
+          <div className="relative mt-2 h-7 w-full">
+            <div className="absolute inset-x-0 top-3 h-px bg-border" />
+            {timelineEvents.map((e) => {
+              const lap = e.lap ?? 1;
+              const left = total > 1 ? ((lap - 1) / (total - 1)) * 100 : 0;
+              return (
+                <button
+                  key={e.id}
+                  type="button"
+                  onClick={() => { setPlaying(false); jump(lap); }}
+                  title={`L${lap} · ${EVENT_STYLE[e.kind].label} — ${e.message || e.title}`}
+                  aria-label={`Jump to lap ${lap}: ${EVENT_STYLE[e.kind].label}`}
+                  className="group absolute top-0 -ml-1.5 h-7 w-3"
+                  style={{ left: `${left}%` }}
+                >
+                  <span
+                    className="mx-auto block h-2.5 w-2.5 rounded-full transition-transform group-hover:scale-150"
+                    style={{ background: EVENT_STYLE[e.kind].color }}
+                  />
+                </button>
+              );
+            })}
           </div>
         )}
+        <div className="mt-1 text-[9px] uppercase tracking-widest text-muted-foreground">
+          Space play · ← → lap · ↑ ↓ speed · click markers to jump
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -217,7 +378,41 @@ export function RaceReplay({
           lapProgress={lapProgress}
           trackStatus={state.trackStatus}
           drsZones={drsZones}
-          leaderColor={leaderColor}
+          cars={cars}
+          selectedId={selected}
+          onSelect={setSelected}
+          wet={(wx?.rainChance ?? 0) >= 40}
+          dryLine={wx?.dryLine}
+          info={
+            sel && selDriver ? (
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-1 rounded-full" style={{ background: teamFor(selDriver).color }} />
+                  <span className="font-display text-base leading-none">{selDriver.lastName}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(null)}
+                    className="ml-auto text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {teamFor(selDriver).name}
+                </div>
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-timing tabular-nums">
+                  <Row label="Pos" value={`P${sel.position}`} />
+                  <Row label="Gap" value={sel.position === 1 ? "Leader" : `+${sel.gapSec.toFixed(1)}s`} />
+                  <Row label="Tyre" value={`${sel.compound} ${sel.tyreAge}L`} />
+                  <Row label="Life" value={`${sel.tyreLifePct}%`} />
+                  <Row label="Stops" value={String(selStops.length)} />
+                  <Row label="Sector" value={`S${lapProgress < 1 / 3 ? 1 : lapProgress < 2 / 3 ? 2 : 3}`} />
+                  <Row label="Gained" value={`${sel.positionsGained >= 0 ? "+" : ""}${sel.positionsGained}`} />
+                  <Row label="Status" value={sel.pitting ? "In pits" : sel.retired ? "Out" : "Running"} />
+                </dl>
+              </div>
+            ) : null
+          }
         />
 
         <div className="min-w-0 glass rounded-2xl p-5 sm:p-6">
@@ -229,11 +424,11 @@ export function RaceReplay({
               const t = teamFor(d);
               return (
                 <li key={o.driverId}>
-                  <Link
-                    to="/drivers/$driverId"
-                    params={{ driverId: o.driverId }}
+                  <div
+                    onMouseEnter={() => setSelected(o.driverId)}
                     className={
-                      "flex min-w-0 items-center gap-2 rounded-lg border border-transparent px-2 py-1.5 hover:border-accent/40 hover:bg-surface/60 transition-colors " +
+                      "flex min-w-0 items-center gap-2 rounded-lg border px-2 py-1.5 transition-colors " +
+                      (selected === o.driverId ? "border-accent/50 bg-surface/60 " : "border-transparent hover:border-accent/40 hover:bg-surface/60 ") +
                       (o.retired ? "opacity-45" : "")
                     }
                   >
@@ -241,7 +436,13 @@ export function RaceReplay({
                       {o.retired ? "—" : o.position}
                     </span>
                     <span className="h-4 w-1 shrink-0 rounded-full" style={{ background: t.color }} />
-                    <span className="min-w-0 flex-1 truncate text-sm">{d.lastName}</span>
+                    <Link
+                      to="/drivers/$driverId"
+                      params={{ driverId: o.driverId }}
+                      className="min-w-0 flex-1 truncate text-sm hover:text-accent"
+                    >
+                      {d.lastName}
+                    </Link>
                     {!o.retired && (
                       <span
                         className="shrink-0 rounded-full border px-1.5 text-[9px] uppercase tracking-widest"
@@ -255,7 +456,7 @@ export function RaceReplay({
                     <span className="w-14 shrink-0 text-right font-timing tabular-nums text-xs text-muted-foreground">
                       {o.retired ? "DNF" : o.position === 1 ? "Leader" : `+${o.gapSec.toFixed(1)}`}
                     </span>
-                  </Link>
+                  </div>
                 </li>
               );
             })}
@@ -322,14 +523,14 @@ export function RaceReplay({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Panel title="Race control feed">
-          <ul className="space-y-2">
+        <Panel title="Race feed">
+          <ul ref={feedRef} className="max-h-56 space-y-2 overflow-y-auto pr-1">
             {feed.map((e) => (
               <li key={e.id} className="flex min-w-0 gap-2 text-xs">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: EVENT_STYLE[e.kind].color }} />
                 <div className="min-w-0">
                   <div className="uppercase tracking-widest text-[10px] text-muted-foreground">L{e.lap ?? 1} · {EVENT_STYLE[e.kind].label}</div>
-                  <div className="truncate">{e.message || e.title}</div>
+                  <div className="break-words">{e.message || e.title}</div>
                 </div>
               </li>
             ))}
@@ -354,7 +555,46 @@ export function RaceReplay({
           </div>
         </Panel>
       </div>
+
+      {battle && candidates.length > 1 && (
+        <RaceBattle
+          model={model}
+          a={battle.a}
+          b={battle.b}
+          currentLap={lapIndex}
+          driversById={driversById}
+          colorOf={(id) => {
+            const d = driversById[id];
+            return d ? teamFor(d).color : "var(--accent)";
+          }}
+          candidates={candidates}
+          onChange={(which, id) => setBattle((prev) => (prev ? { ...prev, [which]: id } : prev))}
+        />
+      )}
+
+      {insights.length > 0 && (
+        <Panel title="Race insights">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {insights.map((i) => (
+              <div key={i.key} className="min-w-0 rounded-xl border border-border bg-surface/40 p-3">
+                <div className="text-[9px] uppercase tracking-widest text-muted-foreground">{i.label}</div>
+                <div className="truncate font-display text-lg leading-tight">{i.value}</div>
+                <div className="truncate text-[11px] text-muted-foreground">{i.detail}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
     </section>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <dt className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</dt>
+      <dd className="text-right">{value}</dd>
+    </>
   );
 }
 
