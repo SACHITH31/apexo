@@ -8,6 +8,8 @@ import { ProgressionChart, type Series } from "@/components/StatCharts";
 import { PageSkeleton } from "@/components/Skeletons";
 import { EmptyState } from "@/components/EmptyState";
 import { ShareCard } from "@/components/ShareCard";
+import { DnaCompare } from "@/components/DnaCompare";
+import { driverDna, teamDna } from "@/lib/f1-dna";
 
 type Mode = "drivers" | "teams";
 
@@ -93,7 +95,7 @@ function ComparePage() {
   const points = mode === "drivers" ? stats.driverPoints : stats.teamPoints;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
+    <div className="mx-auto w-full max-w-5xl min-w-0 px-4 sm:px-6 py-6 sm:py-10">
       <header className="relative overflow-hidden rounded-2xl carbon-texture border border-border p-6 sm:p-8 animate-slide-up">
         <div
           className="pointer-events-none absolute inset-0 opacity-60"
@@ -170,6 +172,17 @@ function ComparePage() {
           </div>
         </div>
       </header>
+
+      <div className="mt-6">
+        <DnaCompare
+          left={mode === "drivers" ? driverDna(idA, stats.drivers[idA]) : teamDna(idA, stats.teams[idA])}
+          right={mode === "drivers" ? driverDna(idB, stats.drivers[idB]) : teamDna(idB, stats.teams[idB])}
+          leftName={series[0].name}
+          rightName={series[1].name}
+          leftColor={colorA}
+          rightColor={colorB}
+        />
+      </div>
 
       <div className="mt-6">
         <CompareList metrics={metrics} leftColor={colorA} rightColor={colorB} />
