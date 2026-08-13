@@ -5,6 +5,8 @@ import { Calendar as CalIcon, MapPin, Timer, Zap } from "lucide-react";
 import { CircuitSignature } from "@/components/CircuitSignature";
 import { FormattedDate } from "@/components/ClientOnly";
 import { CalendarSkeleton } from "@/components/Skeletons";
+import { SeasonSelector } from "@/components/SeasonSelector";
+import { useSeasonSelection } from "@/lib/season";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
@@ -20,7 +22,8 @@ export const Route = createFileRoute("/calendar")({
 });
 
 function CalendarPage() {
-  const { season, races, circuits } = useSeason();
+  const { isCurrent } = useSeasonSelection();
+  const { season, races } = useSeason();
   const now = Date.now();
   const nextIdx = races.findIndex((r) => new Date(r.sessions.race).getTime() > now);
   const completedCount = races.filter((r) => r.status === "completed").length;
@@ -29,14 +32,19 @@ function CalendarPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-10 relative">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
-          <CalIcon className="h-3 w-3" /> {season} Season
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
+            <CalIcon className="h-3 w-3" /> {season} Season
+          </div>
+          <SeasonSelector className="ml-auto" />
         </div>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl">
           Race <span className="text-gradient-accent">calendar</span>
         </h1>
         <p className="mt-2 text-muted-foreground max-w-xl">
-          {races.length} rounds. All times shown in your local timezone. Sprint weekends flagged in red.
+          {races.length} rounds. {isCurrent
+            ? "All times shown in your local timezone. Sprint weekends flagged in red."
+            : "Historical season — every round with its winner, pole and fastest lap."}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Chip>{completedCount} completed</Chip>
@@ -68,7 +76,7 @@ function Chip({ children, highlight }: { children: React.ReactNode; highlight?: 
 }
 
 function RaceCard({ race, isNext, index }: { race: Race; isNext: boolean; index: number }) {
-  const { circuits } = useSeason();
+  const { circuits, driversById } = useSeason();
   const c = circuits[race.circuitId];
   const raceDate = new Date(race.sessions.race);
   const isPast = raceDate.getTime() < Date.now();
@@ -124,7 +132,34 @@ function RaceCard({ race, isNext, index }: { race: Race; isNext: boolean; index:
           <div className="font-timing text-2xl"><FormattedDate iso={race.sessions.race} mode="date" /></div>
           <div className="text-xs text-muted-foreground"><FormattedDate iso={race.sessions.race} mode="time" /></div>
         </div>
+
+        {isPast && (race.podium?.[0] || race.poleId || race.fastestLap) && (
+          <dl className="relative w-full min-w-0 grid grid-cols-2 sm:grid-cols-3 gap-2 border-t border-border pt-3">
+            {race.podium?.[0] && driversById[race.podium[0]] && (
+              <Result label="Winner" value={driversById[race.podium[0]].lastName} />
+            )}
+            {race.poleId && driversById[race.poleId] && (
+              <Result label="Pole" value={driversById[race.poleId].lastName} />
+            )}
+            {race.fastestLap && (
+              <Result
+                label="Fastest lap"
+                value={race.fastestLap.time}
+                sub={driversById[race.fastestLap.driverId]?.lastName}
+              />
+            )}
+          </dl>
+        )}
       </Link>
     </li>
+  );
+}
+
+function Result({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{label}</dt>
+      <dd className="truncate font-timing tabular-nums text-sm">{value}{sub ? ` · ${sub}` : ""}</dd>
+    </div>
   );
 }
