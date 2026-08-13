@@ -201,7 +201,7 @@ export function computeRecords(stats: SeasonStats): RecordGroup[] {
     "reliable",
     "Highest finish rate",
     mostReliable?.driverId,
-    mostReliable ? `${Math.round(mostReliable.finishRate * 100)}%` : "",
+    mostReliable ? `${Math.round(mostReliable.finishRate)}%` : "",
     "driver",
   );
 
