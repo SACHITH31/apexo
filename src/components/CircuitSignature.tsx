@@ -21,6 +21,11 @@ function hash(s: string) {
   return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; };
 }
 
+/** Exported so the replay track map can animate along the same signature. */
+export function buildCircuitPath(id: string) {
+  return buildPath(id);
+}
+
 function buildPath(id: string) {
   const rnd = hash(id);
   const pts: [number, number][] = [];

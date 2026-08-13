@@ -15,6 +15,8 @@ import { ShareCard } from "@/components/ShareCard";
 import { WeatherCenter } from "@/components/WeatherCenter";
 import { LiveTrackStatus } from "@/components/LiveTrackStatus";
 import { useRaceEventAlerts, useSessionAlerts } from "@/lib/live-alerts";
+import { RaceReplay } from "@/components/RaceReplay";
+import { currentSeason, seasonOfRaceId } from "@/lib/season";
 
 
 export const Route = createFileRoute("/races/$raceId")({
@@ -25,11 +27,12 @@ export const Route = createFileRoute("/races/$raceId")({
     ],
   }),
   loader: async ({ context, params }) => {
-    const data = await context.queryClient.ensureQueryData(seasonQueryOptions());
+    const season = seasonOfRaceId(params.raceId) ?? currentSeason();
+    const data = await context.queryClient.ensureQueryData(seasonQueryOptions(season));
     const race = data.racesById[params.raceId];
     if (!race) throw notFound();
     if (race.status !== "upcoming") {
-      context.queryClient.prefetchQuery(raceDetailQueryOptions(race.round));
+      context.queryClient.prefetchQuery(raceDetailQueryOptions(season, race.round));
     }
   },
   component: RacePage,
@@ -44,13 +47,14 @@ export const Route = createFileRoute("/races/$raceId")({
 
 function RacePage() {
   const { raceId } = Route.useParams();
-  const data = useSeason();
+  const season = seasonOfRaceId(raceId) ?? currentSeason();
+  const data = useSeason(season);
   const { racesById, circuits, driversById } = data;
   const r = racesById[raceId];
   const c = circuits[r.circuitId];
   const isUpcoming = r.status === "upcoming";
 
-  const detail = useRaceDetail(r.round);
+  const detail = useRaceDetail(r.round, season);
   const driversByNumber = useMemo(
     () => Object.fromEntries(data.drivers.map((d) => [d.number, d])),
     [data.drivers],
@@ -211,6 +215,17 @@ function RacePage() {
                   teamFor={teamFor}
                 />
               ) : null}
+
+              <RaceReplay
+                race={r}
+                circuitId={c.id}
+                circuitLaps={c.laps}
+                drsZones={c.drsZones}
+                detail={detail.data}
+                driversById={driversById}
+                driversByNumber={driversByNumber}
+                teamFor={teamFor}
+              />
 
               <RaceControlTimeline
                 events={detail.data?.events ?? []}

@@ -7,6 +7,7 @@ import { PageTransition } from "./PageTransition";
 import { OfflineBanner } from "./OfflineBanner";
 import { BottomNav } from "./BottomNav";
 import { AlertsSettings } from "./AlertsSettings";
+import { SeasonSelector } from "./SeasonSelector";
 
 const nav = [
   { to: "/",              label: "Home" },
@@ -85,6 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </select>
 
 
+            <SeasonSelector />
             <AlertsSettings />
 
             <button

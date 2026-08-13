@@ -135,11 +135,11 @@ function mean(values: number[]) {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-export async function fetchSeasonStats(): Promise<SeasonStats> {
-  const results = await getAllRaces("current/results/");
-  const qualifying = await getAllRaces("current/qualifying/").catch(() => [] as AnyJson[]);
+export async function fetchSeasonStats(year: string): Promise<SeasonStats> {
+  const results = await getAllRaces(`${year}/results/`);
+  const qualifying = await getAllRaces(`${year}/qualifying/`).catch(() => [] as AnyJson[]);
 
-  const season: string = String(results[0]?.season ?? new Date().getUTCFullYear());
+  const season: string = String(results[0]?.season ?? year);
   const poleByRound: Record<string, string> = {};
   const gridFallback: Record<string, Record<string, number>> = {};
   for (const q of qualifying) {
@@ -408,16 +408,16 @@ function deriveEvents(results: RaceResultRow[], pits: PitStopRecord[], fastest?:
   return events.sort((a, b) => (a.lap ?? 0) - (b.lap ?? 0));
 }
 
-export async function fetchRaceDetail(round: number): Promise<RaceDetail> {
+export async function fetchRaceDetail(year: string, round: number): Promise<RaceDetail> {
   const [resultsPayload, qualiPayload, pitsPayload] = [
-    await get<AnyJson>(`${BASE}/current/${round}/results/?format=json&limit=100`).catch(() => null),
-    await get<AnyJson>(`${BASE}/current/${round}/qualifying/?format=json&limit=100`).catch(() => null),
-    await get<AnyJson>(`${BASE}/current/${round}/pitstops/?format=json&limit=100`).catch(() => null),
+    await get<AnyJson>(`${BASE}/${year}/${round}/results/?format=json&limit=100`).catch(() => null),
+    await get<AnyJson>(`${BASE}/${year}/${round}/qualifying/?format=json&limit=100`).catch(() => null),
+    await get<AnyJson>(`${BASE}/${year}/${round}/pitstops/?format=json&limit=100`).catch(() => null),
   ];
 
   const raceNode: AnyJson | undefined = resultsPayload?.MRData?.RaceTable?.Races?.[0];
   const season: string = String(
-    raceNode?.season ?? resultsPayload?.MRData?.RaceTable?.season ?? new Date().getUTCFullYear(),
+    raceNode?.season ?? resultsPayload?.MRData?.RaceTable?.season ?? year,
   );
   const raceDate: string = String(raceNode?.date ?? "");
 
@@ -491,22 +491,28 @@ export async function fetchRaceDetail(round: number): Promise<RaceDetail> {
 /* --------------------------------- cache --------------------------------- */
 
 const STATS_TTL = 15 * 60 * 1000;
-let statsCache: { at: number; data: SeasonStats } | null = null;
+const statsCache = new Map<string, { at: number; data: SeasonStats }>();
 
-export async function getSeasonStatsCached(): Promise<SeasonStats> {
-  if (statsCache && Date.now() - statsCache.at < STATS_TTL) return statsCache.data;
-  const data = await fetchSeasonStats();
-  statsCache = { at: Date.now(), data };
+function ttlFor(year: string, live: number) {
+  return Number(year) < new Date().getUTCFullYear() ? Infinity : live;
+}
+
+export async function getSeasonStatsCached(year: string): Promise<SeasonStats> {
+  const hit = statsCache.get(year);
+  if (hit && Date.now() - hit.at < ttlFor(year, STATS_TTL)) return hit.data;
+  const data = await fetchSeasonStats(year);
+  statsCache.set(year, { at: Date.now(), data });
   return data;
 }
 
 const RACE_TTL = 5 * 60 * 1000;
-const raceCache = new Map<number, { at: number; data: RaceDetail }>();
+const raceCache = new Map<string, { at: number; data: RaceDetail }>();
 
-export async function getRaceDetailCached(round: number): Promise<RaceDetail> {
-  const hit = raceCache.get(round);
-  if (hit && Date.now() - hit.at < RACE_TTL) return hit.data;
-  const data = await fetchRaceDetail(round);
-  raceCache.set(round, { at: Date.now(), data });
+export async function getRaceDetailCached(year: string, round: number): Promise<RaceDetail> {
+  const key = `${year}:${round}`;
+  const hit = raceCache.get(key);
+  if (hit && Date.now() - hit.at < ttlFor(year, RACE_TTL)) return hit.data;
+  const data = await fetchRaceDetail(year, round);
+  raceCache.set(key, { at: Date.now(), data });
   return data;
 }

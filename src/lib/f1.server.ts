@@ -98,23 +98,23 @@ function raceIdOf(season: string, round: string | number) {
 
 /* --------------------------------- build -------------------------------- */
 
-export async function fetchSeasonData(): Promise<SeasonData> {
+export async function fetchSeasonData(year: string): Promise<SeasonData> {
   const [schedule, ds, cs] = await Promise.all([
-    get<AnyJson>("current/races/?format=json&limit=100"),
-    get<AnyJson>("current/driverstandings/?format=json&limit=100"),
-    get<AnyJson>("current/constructorstandings/?format=json&limit=100"),
+    get<AnyJson>(`${year}/races/?format=json&limit=100`),
+    get<AnyJson>(`${year}/driverstandings/?format=json&limit=100`),
+    get<AnyJson>(`${year}/constructorstandings/?format=json&limit=100`),
   ]);
 
-  const season: string = schedule.MRData.RaceTable.season;
+  const season: string = schedule.MRData.RaceTable.season ?? year;
   const seasonNum = Number(season);
   const apiRaces: AnyJson[] = schedule.MRData.RaceTable.Races ?? [];
 
   // Sequential: the API rate-limits bursts, and a 429 would silently drop results.
   const safeGet = (p: string) => get<AnyJson>(p).catch(() => null);
-  const p1 = await safeGet("current/results/1/?format=json&limit=100");
-  const p2 = await safeGet("current/results/2/?format=json&limit=100");
-  const p3 = await safeGet("current/results/3/?format=json&limit=100");
-  const poles = await safeGet("current/qualifying/1/?format=json&limit=100");
+  const p1 = await safeGet(`${year}/results/1/?format=json&limit=100`);
+  const p2 = await safeGet(`${year}/results/2/?format=json&limit=100`);
+  const p3 = await safeGet(`${year}/results/3/?format=json&limit=100`);
+  const poles = await safeGet(`${year}/qualifying/1/?format=json&limit=100`);
 
 
   const byRound = (payload: AnyJson | null, key: "Results" | "QualifyingResults") => {
@@ -255,11 +255,35 @@ export async function fetchSeasonData(): Promise<SeasonData> {
 /* --------------------------- server-side cache --------------------------- */
 
 const TTL = 10 * 60 * 1000;
-let cache: { at: number; data: SeasonData } | null = null;
+const cache = new Map<string, { at: number; data: SeasonData }>();
 
-export async function getSeasonDataCached(): Promise<SeasonData> {
-  if (cache && Date.now() - cache.at < TTL) return cache.data;
-  const data = await fetchSeasonData();
-  cache = { at: Date.now(), data };
+export async function getSeasonDataCached(year: string): Promise<SeasonData> {
+  const hit = cache.get(year);
+  // Past seasons never change: keep them for the life of the worker.
+  const ttl = Number(year) < new Date().getUTCFullYear() ? Infinity : TTL;
+  if (hit && Date.now() - hit.at < ttl) return hit.data;
+  const data = await fetchSeasonData(year);
+  cache.set(year, { at: Date.now(), data });
+  return data;
+}
+
+/* ------------------------------ season list ------------------------------ */
+
+let seasonsCache: { at: number; data: string[] } | null = null;
+
+/** Every season the archive can serve, newest first. */
+export async function getSeasonsCached(): Promise<string[]> {
+  if (seasonsCache && Date.now() - seasonsCache.at < 6 * 60 * 60 * 1000) return seasonsCache.data;
+  const years = new Set<string>();
+  for (let offset = 0; offset < 200; offset += 100) {
+    const page = await get<AnyJson>(`seasons/?format=json&limit=100&offset=${offset}`).catch(() => null);
+    const list: AnyJson[] = page?.MRData?.SeasonTable?.Seasons ?? [];
+    for (const s of list) years.add(String(s.season));
+    const total = Number(page?.MRData?.total ?? 0);
+    if (!list.length || offset + 100 >= total) break;
+  }
+  years.add(String(new Date().getUTCFullYear()));
+  const data = [...years].sort((a, b) => Number(b) - Number(a));
+  seasonsCache = { at: Date.now(), data };
   return data;
 }
