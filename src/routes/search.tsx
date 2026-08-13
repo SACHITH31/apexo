@@ -1,7 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
+import { seasonStatsQueryOptions } from "@/lib/f1-extra-data";
+import { computeRecords } from "@/lib/records";
+import { useAvailableSeasons, useSeasonSelection } from "@/lib/season";
 import { Search as SearchIcon } from "lucide-react";
+
+const PAGES = [
+  { to: "/championship", label: "Championship Playback", hint: "Replay the season round-by-round" },
+  { to: "/seasons", label: "Season Comparison", hint: "Compare any two seasons" },
+  { to: "/records", label: "Records & Achievements", hint: "Season record book" },
+  { to: "/season-story", label: "Season Story", hint: "Interactive season timeline" },
+  { to: "/statistics", label: "Statistics", hint: "Championship analytics" },
+  { to: "/compare", label: "Compare", hint: "Driver and team head-to-head" },
+  { to: "/strategy", label: "Strategy Simulator", hint: "Pit stop strategy modelling" },
+  { to: "/simulator", label: "Championship Simulator", hint: "Title permutations" },
+  { to: "/circuits", label: "Circuits", hint: "Circuit explorer" },
+  { to: "/glossary", label: "Glossary", hint: "F1 terminology" },
+] as const;
 
 export const Route = createFileRoute("/search")({
   head: () => ({
@@ -11,12 +28,18 @@ export const Route = createFileRoute("/search")({
     ],
   }),
   component: SearchPage,
-  loader: ({ context }) => context.queryClient.ensureQueryData(seasonQueryOptions()),
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(seasonQueryOptions());
+    context.queryClient.prefetchQuery(seasonStatsQueryOptions());
+  },
 
 });
 
 function SearchPage() {
   const data = useSeason();
+  const allSeasons = useAvailableSeasons();
+  const { setSeason } = useSeasonSelection();
+  const stats = useQuery(seasonStatsQueryOptions()).data;
   const { drivers, teams, circuits, races } = data;
   const [q, setQ] = useState("");
   const query = q.trim().toLowerCase();
@@ -29,8 +52,16 @@ function SearchPage() {
     const t = Object.values(teams).filter((x) => x.name.toLowerCase().includes(query) || x.fullName.toLowerCase().includes(query));
     const c = Object.values(circuits).filter((x) => `${x.name} ${x.country} ${x.location}`.toLowerCase().includes(query));
     const r = races.filter((x) => `${x.name} ${x.officialName}`.toLowerCase().includes(query));
-    return { d, t, c, r };
-  }, [query, drivers, teams, circuits, races]);
+    const y = allSeasons.filter((s) => s.includes(query)).slice(0, 24);
+    const rec = stats
+      ? computeRecords(stats)
+          .flatMap((g) => g.items.map((i) => ({ ...i, group: g.title })))
+          .filter((i) => `${i.label} ${i.holderId} ${i.detail ?? ""}`.toLowerCase().includes(query))
+          .slice(0, 12)
+      : [];
+    const p = PAGES.filter((x) => `${x.label} ${x.hint}`.toLowerCase().includes(query));
+    return { d, t, c, r, y, rec, p };
+  }, [query, drivers, teams, circuits, races, allSeasons, stats]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-10">
@@ -45,7 +76,7 @@ function SearchPage() {
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Drivers, teams, circuits, races…"
+          placeholder="Drivers, teams, circuits, races, records, seasons…"
           className="w-full rounded-full border border-border bg-surface/60 py-3.5 pl-11 pr-4 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/40 transition"
         />
       </div>
@@ -89,6 +120,41 @@ function SearchPage() {
               <Link key={r.id} to="/races/$raceId" params={{ raceId: r.id }} className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 p-3 hover:border-accent/50">
                 <div className="font-timing text-2xl w-8 text-center text-muted-foreground">{String(r.round).padStart(2, "0")}</div>
                 <div className="min-w-0 flex-1"><div className="font-display text-lg truncate">{r.name}</div><div className="text-xs text-muted-foreground">{new Date(r.sessions.race).toLocaleDateString()}</div></div>
+              </Link>
+            ))}
+          </Section>
+          <Section title="Records" empty={results.rec.length === 0}>
+            {results.rec.map((item) => (
+              <Link key={item.id} to="/records" className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 p-3 hover:border-accent/50">
+                <div className="min-w-0 flex-1">
+                  <div className="font-display text-lg truncate">{item.label}</div>
+                  <div className="text-xs text-muted-foreground truncate">{item.group}{item.detail ? ` · ${item.detail}` : ""}</div>
+                </div>
+                <span className="font-timing tabular-nums text-accent-glow">{item.value}</span>
+              </Link>
+            ))}
+          </Section>
+          <Section title="Seasons" empty={results.y.length === 0}>
+            <li className="flex flex-wrap gap-1">
+              {results.y.map((y) => (
+                <Link
+                  key={y}
+                  to="/standings"
+                  onClick={() => setSeason(y)}
+                  className="rounded-full border border-border px-3 py-1.5 font-timing tabular-nums text-xs text-muted-foreground hover:text-foreground hover:border-accent/50"
+                >
+                  {y}
+                </Link>
+              ))}
+            </li>
+          </Section>
+          <Section title="Explore" empty={results.p.length === 0}>
+            {results.p.map((p) => (
+              <Link key={p.to} to={p.to} className="flex items-center gap-3 rounded-lg border border-border bg-surface/40 p-3 hover:border-accent/50">
+                <div className="min-w-0 flex-1">
+                  <div className="font-display text-lg truncate">{p.label}</div>
+                  <div className="text-xs text-muted-foreground truncate">{p.hint}</div>
+                </div>
               </Link>
             ))}
           </Section>
