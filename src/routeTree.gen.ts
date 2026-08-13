@@ -18,6 +18,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as ChampionshipRouteImport } from './routes/championship'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DriversIndexRouteImport } from './routes/drivers.index'
@@ -73,6 +74,11 @@ const CompareRoute = CompareRouteImport.update({
   path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChampionshipRoute = ChampionshipRouteImport.update({
+  id: '/championship',
+  path: '/championship',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -122,6 +128,7 @@ const CircuitsCircuitIdRoute = CircuitsCircuitIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/championship': typeof ChampionshipRoute
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/championship': typeof ChampionshipRoute
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/championship': typeof ChampionshipRoute
   '/compare': typeof CompareRoute
   '/glossary': typeof GlossaryRoute
   '/playground': typeof PlaygroundRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calendar'
+    | '/championship'
     | '/compare'
     | '/glossary'
     | '/playground'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/calendar'
+    | '/championship'
     | '/compare'
     | '/glossary'
     | '/playground'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/calendar'
+    | '/championship'
     | '/compare'
     | '/glossary'
     | '/playground'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
+  ChampionshipRoute: typeof ChampionshipRoute
   CompareRoute: typeof CompareRoute
   GlossaryRoute: typeof GlossaryRoute
   PlaygroundRoute: typeof PlaygroundRoute
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/championship': {
+      id: '/championship'
+      path: '/championship'
+      fullPath: '/championship'
+      preLoaderRoute: typeof ChampionshipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -398,6 +418,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
+  ChampionshipRoute: ChampionshipRoute,
   CompareRoute: CompareRoute,
   GlossaryRoute: GlossaryRoute,
   PlaygroundRoute: PlaygroundRoute,
