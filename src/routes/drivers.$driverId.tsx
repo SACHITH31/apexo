@@ -7,6 +7,7 @@ import { DetailSkeleton } from "@/components/Skeletons";
 import { bioFor } from "@/lib/driver-career";
 import { CareerTimeline } from "@/components/CareerTimeline";
 import { DnaPanel } from "@/components/DnaRadar";
+import { SeasonBadges } from "@/components/SeasonBadges";
 import { driverDna } from "@/lib/f1-dna";
 import { ProShareCard } from "@/components/ProShareCard";
 
@@ -117,7 +118,10 @@ function DriverProfile() {
         </div>
       </header>
 
+      <SeasonBadges stats={stats} driverId={d.id} />
+
       <section className="mt-8">
+
         <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">Career</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <BigStat label="Titles" value={d.championships} highlight={d.championships > 0} />
