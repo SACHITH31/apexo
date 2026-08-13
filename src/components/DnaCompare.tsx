@@ -49,7 +49,7 @@ export function DnaCompare({
           <div id="dna-compare-heading" className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             <Activity className="h-3 w-3" /> F1 DNA compare
           </div>
-          <h2 className="mt-1 truncate font-display text-2xl leading-none">Performance fingerprints</h2>
+          <h2 className="mt-1 font-display text-xl leading-tight sm:truncate sm:text-2xl">Performance fingerprints</h2>
           <p className="mt-1 text-xs text-muted-foreground">
             <span style={{ color: leftColor }}>{leftName}</span> vs <span style={{ color: rightColor }}>{rightName}</span>
           </p>
