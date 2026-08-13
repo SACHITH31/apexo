@@ -126,7 +126,7 @@ function StatisticsPage() {
         </div>
       ) : (
         <>
-          <div className="mt-6 flex gap-2" role="tablist" aria-label="Statistics view">
+          <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Statistics view">
             {(
               [
                 ["drivers", "Drivers", LineChart],

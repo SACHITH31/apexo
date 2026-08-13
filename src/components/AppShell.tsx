@@ -6,6 +6,7 @@ import { teams } from "@/lib/mock-data";
 import { PageTransition } from "./PageTransition";
 import { OfflineBanner } from "./OfflineBanner";
 import { BottomNav } from "./BottomNav";
+import { AlertsSettings } from "./AlertsSettings";
 
 const nav = [
   { to: "/",              label: "Home" },
@@ -29,23 +30,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { favoriteTeam, setFavoriteTeam } = useTeamTheme();
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen w-full min-w-0 flex-col">
       <header className="sticky top-0 z-40 glass border-b border-border/50">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2.5 group">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:px-6">
+          <Link to="/" className="flex shrink-0 items-center gap-2.5 group">
             <LogoMark />
             <span className="font-display text-2xl tracking-widest">APEXO</span>
           </Link>
 
-          <nav className="ml-6 hidden lg:flex items-center gap-1">
+          <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 overflow-x-auto no-scrollbar">
+
             {nav.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
-                className="px-3 py-1.5 text-sm font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors relative"
+                className="shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors relative"
                 activeProps={{ className: "text-foreground" }}
                 activeOptions={{ exact: n.to === "/" }}
               >
+
                 {({ isActive }) => (
                   <>
                     {n.label}
@@ -58,22 +61,22 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex min-w-0 shrink items-center gap-2">
             <Link
               to="/search"
-              className="hidden sm:flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors min-w-52"
+              className="hidden sm:flex min-w-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors w-52 max-w-full"
             >
-              <Search className="h-3.5 w-3.5" />
-              <span>Search drivers, races…</span>
+              <Search className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Search drivers, races…</span>
             </Link>
-            <Link to="/search" className="sm:hidden p-2 rounded-md hover:bg-surface" aria-label="Search">
+            <Link to="/search" className="sm:hidden shrink-0 p-2 rounded-md hover:bg-surface" aria-label="Search">
               <Search className="h-5 w-5" />
             </Link>
 
             <select
               value={favoriteTeam}
               onChange={(e) => setFavoriteTeam(e.target.value as never)}
-              className="hidden md:block rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:border-accent/50 focus:border-accent outline-none transition-colors"
+              className="hidden md:block min-w-0 max-w-40 shrink truncate rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:border-accent/50 focus:border-accent outline-none transition-colors"
               aria-label="Favorite team accent color"
             >
               {Object.values(teams).map((t) => (
@@ -81,8 +84,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
             </select>
 
+
+            <AlertsSettings />
+
             <button
-              className="lg:hidden p-2 rounded-md hover:bg-surface"
+              className="lg:hidden shrink-0 p-2 rounded-md hover:bg-surface"
               onClick={() => setOpen((v) => !v)}
               aria-label="Menu"
             >
@@ -126,12 +132,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <OfflineBanner />
 
-      <main className="flex-1 pb-20 lg:pb-0 tap-highlight-none">
+      <main className="w-full min-w-0 flex-1 pb-20 lg:pb-0 tap-highlight-none">
         <PageTransition>{children}</PageTransition>
       </main>
 
       <footer className="border-t border-border/50 mt-12 pb-20 lg:pb-0">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 text-xs text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 text-xs text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2">
           <span className="font-display tracking-widest text-sm text-foreground">APEXO</span>
           <span>Unofficial F1 companion. Not affiliated with the FIA or Formula One Group.</span>
           <span className="ml-auto">Data placeholders — live sync coming soon.</span>

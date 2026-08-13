@@ -14,7 +14,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
-    <div key={key} className="animate-page-in">
+    <div key={key} className="w-full min-w-0 animate-page-in">
       {children}
     </div>
   );

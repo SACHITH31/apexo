@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { CalendarRange, ChevronDown, Flag, Gauge, Timer, Trophy, Zap } from "lucide-react";
+import { Bookmark, BookmarkCheck, CalendarRange, ChevronDown, Flag, Gauge, PlayCircle, Timer, Trophy, Zap } from "lucide-react";
 import { seasonQueryOptions, teamOf, useSeason } from "@/lib/f1-data";
 import { seasonStatsQueryOptions, useSeasonStats } from "@/lib/f1-extra-data";
 import { PageSkeleton } from "@/components/Skeletons";
 import { EmptyState } from "@/components/EmptyState";
 import { ProShareCard } from "@/components/ProShareCard";
 import { PageTransition } from "@/components/PageTransition";
+import { useStoryBookmarks } from "@/lib/bookmarks";
 
 export const Route = createFileRoute("/season-story")({
   head: () => ({
@@ -34,13 +35,14 @@ export const Route = createFileRoute("/season-story")({
   pendingComponent: PageSkeleton,
 });
 
-type Filter = "all" | "sprint" | "swings" | "upcoming";
+type Filter = "all" | "sprint" | "swings" | "upcoming" | "saved";
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All rounds" },
   { id: "sprint", label: "Sprint" },
   { id: "swings", label: "Title swings" },
   { id: "upcoming", label: "Upcoming" },
+  { id: "saved", label: "Bookmarked" },
 ];
 
 function SeasonStoryPage() {
@@ -48,6 +50,18 @@ function SeasonStoryPage() {
   const stats = useSeasonStats();
   const [filter, setFilter] = useState<Filter>("all");
   const [open, setOpen] = useState<number | null>(null);
+  const { bookmarks, isBookmarked, toggle, clear: clearBookmarks, resume, setResume } = useStoryBookmarks(season.season);
+
+  /** Expand a round, remember it as the resume point and scroll it into view. */
+  const openRound = (round: number) => {
+    setOpen(round);
+    setResume(round);
+    if (typeof document !== "undefined") {
+      window.requestAnimationFrame(() => {
+        document.getElementById(`story-round-${round}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  };
 
   /** Running championship state after each completed round. */
   const chapters = useMemo(() => {
@@ -97,9 +111,10 @@ function SeasonStoryPage() {
         if (filter === "sprint") return c.race.hasSprint;
         if (filter === "swings") return c.leaderChange;
         if (filter === "upcoming") return !c.completed;
+        if (filter === "saved") return bookmarks.includes(c.race.round);
         return true;
       }),
-    [chapters, filter],
+    [chapters, filter, bookmarks],
   );
 
   const driverName = (id?: string) => {
@@ -140,6 +155,19 @@ function SeasonStoryPage() {
             <Chip label="Rounds" value={String(season.races.length)} />
             <Chip label="Raced" value={String(completedCount)} />
             <Chip label="Lead changes" value={String(swings)} />
+            <Chip label="Bookmarks" value={String(bookmarks.length)} />
+            {resume !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilter("all");
+                  openRound(resume);
+                }}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-accent/60 bg-accent/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-foreground transition-colors hover:bg-accent/20"
+              >
+                <PlayCircle className="h-3.5 w-3.5" /> Resume round {resume}
+              </button>
+            )}
             <ProShareCard
               className="ml-auto"
               label="Share season"
@@ -181,10 +209,19 @@ function SeasonStoryPage() {
               {f.label}
             </button>
           ))}
+          {bookmarks.length > 0 && (
+            <button
+              type="button"
+              onClick={clearBookmarks}
+              className="ml-auto hidden shrink-0 rounded-full border border-border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground sm:block"
+            >
+              Clear bookmarks
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setOpen(null)}
-            className="ml-auto hidden shrink-0 rounded-full border border-border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground sm:block"
+            className={(bookmarks.length > 0 ? "" : "ml-auto ") + "hidden shrink-0 rounded-full border border-border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground sm:block"}
           >
             Collapse all
           </button>
@@ -211,7 +248,9 @@ function SeasonStoryPage() {
                 chapter={c}
                 season={season}
                 expanded={open === c.race.round}
-                onToggle={() => setOpen(open === c.race.round ? null : c.race.round)}
+                bookmarked={isBookmarked(c.race.round)}
+                onBookmark={() => toggle(c.race.round)}
+                onToggle={() => (open === c.race.round ? setOpen(null) : openRound(c.race.round))}
               />
             ))}
           </ol>
@@ -251,12 +290,16 @@ function Chapter({
   expanded,
   index,
   onToggle,
+  bookmarked,
+  onBookmark,
 }: {
   chapter: Chapter;
   season: ReturnType<typeof useSeason>;
   expanded: boolean;
   index: number;
   onToggle: () => void;
+  bookmarked: boolean;
+  onBookmark: () => void;
 }) {
   const { race, circuit, entries, completed } = chapter;
   const podium = useMemo(
@@ -274,7 +317,7 @@ function Chapter({
   const code = (id?: string) => (id ? (season.driversById[id]?.code ?? id.slice(0, 3).toUpperCase()) : "—");
 
   return (
-    <li className="relative motion-safe:animate-slide-up" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
+    <li id={`story-round-${race.round}`} className="relative min-w-0 scroll-mt-28 motion-safe:animate-slide-up" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
       <span
         aria-hidden
         className="absolute -left-6 top-6 grid h-3.5 w-3.5 place-items-center rounded-full border-2 sm:-left-8"
@@ -334,6 +377,19 @@ function Chapter({
             className={"h-4 w-4 shrink-0 text-muted-foreground transition-transform " + (expanded ? "rotate-180" : "")}
             aria-hidden
           />
+        </button>
+
+        <button
+          type="button"
+          onClick={onBookmark}
+          aria-pressed={bookmarked}
+          aria-label={bookmarked ? `Remove bookmark for ${race.name}` : `Bookmark ${race.name}`}
+          className={
+            "absolute right-11 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full transition-colors " +
+            (bookmarked ? "text-accent-glow" : "text-muted-foreground hover:text-foreground")
+          }
+        >
+          {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
         </button>
 
         {expanded && (

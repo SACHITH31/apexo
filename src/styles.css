@@ -405,3 +405,9 @@
 
 .theme-audi     { --accent: oklch(0.55 0.20 20);  --accent-glow: oklch(0.64 0.21 22); }
 .theme-cadillac { --accent: oklch(0.75 0.14 90);  --accent-glow: oklch(0.83 0.14 92); }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
+}
