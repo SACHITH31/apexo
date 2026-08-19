@@ -77,13 +77,18 @@ export function MoreMenu() {
     else if (e.key === "Tab") close();
   };
 
+  const byHover = useRef(false);
   const hoverOpen = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (!open) byHover.current = true;
     setOpen(true);
   };
   const hoverClose = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setOpen(false), 140);
+    closeTimer.current = setTimeout(() => {
+      byHover.current = false;
+      setOpen(false);
+    }, 140);
   };
 
   return (
@@ -99,7 +104,12 @@ export function MoreMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          // A pointer that hovered the trigger has already opened the panel —
+          // the click should pin it, not immediately toggle it shut.
+          if (open && byHover.current) { byHover.current = false; return; }
+          setOpen((v) => !v);
+        }}
         onKeyDown={onTriggerKey}
         className={
           "relative flex shrink-0 items-center gap-1 whitespace-nowrap px-3 py-1.5 text-sm font-medium uppercase tracking-wider transition-colors " +
