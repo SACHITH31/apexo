@@ -8,26 +8,11 @@ import { OfflineBanner } from "./OfflineBanner";
 import { BottomNav } from "./BottomNav";
 import { AlertsSettings } from "./AlertsSettings";
 import { SeasonSelector } from "./SeasonSelector";
+import { MoreMenu } from "./MoreMenu";
+import { allNav, primaryNav } from "@/lib/nav-config";
 
-const nav = [
-  { to: "/",              label: "Home" },
-  { to: "/calendar",      label: "Calendar" },
-  { to: "/season-story",  label: "Season Story" },
-  { to: "/standings",     label: "Standings" },
-  { to: "/statistics",    label: "Statistics" },
-  { to: "/championship",  label: "Playback" },
-  { to: "/seasons",       label: "Seasons" },
-  { to: "/records",       label: "Records" },
-  { to: "/compare",       label: "Compare" },
-  { to: "/simulator",     label: "Simulator" },
-  { to: "/strategy",      label: "Strategy" },
+const nav = allNav;
 
-  { to: "/drivers",       label: "Drivers" },
-  { to: "/constructors",  label: "Teams" },
-  { to: "/circuits",      label: "Circuits" },
-  { to: "/playground",    label: "Playground" },
-  { to: "/glossary",      label: "Glossary" },
-] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -44,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 overflow-x-auto no-scrollbar">
 
-            {nav.map((n) => (
+            {primaryNav.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
@@ -63,6 +48,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               </Link>
             ))}
+            <MoreMenu />
+
           </nav>
 
           <div className="ml-auto flex min-w-0 shrink items-center gap-2">
