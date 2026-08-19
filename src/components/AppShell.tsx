@@ -8,26 +8,11 @@ import { OfflineBanner } from "./OfflineBanner";
 import { BottomNav } from "./BottomNav";
 import { AlertsSettings } from "./AlertsSettings";
 import { SeasonSelector } from "./SeasonSelector";
+import { MoreMenu } from "./MoreMenu";
+import { allNav, primaryNav } from "@/lib/nav-config";
 
-const nav = [
-  { to: "/",              label: "Home" },
-  { to: "/calendar",      label: "Calendar" },
-  { to: "/season-story",  label: "Season Story" },
-  { to: "/standings",     label: "Standings" },
-  { to: "/statistics",    label: "Statistics" },
-  { to: "/championship",  label: "Playback" },
-  { to: "/seasons",       label: "Seasons" },
-  { to: "/records",       label: "Records" },
-  { to: "/compare",       label: "Compare" },
-  { to: "/simulator",     label: "Simulator" },
-  { to: "/strategy",      label: "Strategy" },
+const nav = allNav;
 
-  { to: "/drivers",       label: "Drivers" },
-  { to: "/constructors",  label: "Teams" },
-  { to: "/circuits",      label: "Circuits" },
-  { to: "/playground",    label: "Playground" },
-  { to: "/glossary",      label: "Glossary" },
-] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -42,9 +27,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-display text-2xl tracking-widest">APEXO</span>
           </Link>
 
-          <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <nav className="ml-4 hidden shrink-0 lg:flex items-center gap-0.5 whitespace-nowrap xl:gap-1">
 
-            {nav.map((n) => (
+            {primaryNav.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
@@ -63,17 +48,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               </Link>
             ))}
+            <MoreMenu />
+
           </nav>
 
           <div className="ml-auto flex min-w-0 shrink items-center gap-2">
             <Link
               to="/search"
-              className="hidden sm:flex min-w-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors w-52 max-w-full"
+              className="hidden xl:flex min-w-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors w-44 max-w-full"
             >
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">Search drivers, races…</span>
             </Link>
-            <Link to="/search" className="sm:hidden shrink-0 p-2 rounded-md hover:bg-surface" aria-label="Search">
+            <Link to="/search" className="xl:hidden shrink-0 p-2 rounded-md hover:bg-surface" aria-label="Search">
               <Search className="h-5 w-5" />
             </Link>
 

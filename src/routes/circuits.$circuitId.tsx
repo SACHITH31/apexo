@@ -7,6 +7,9 @@ import { ShareCard } from "@/components/ShareCard";
 import { OVERTAKE_LABEL, WEAR_LABEL, profileFor } from "@/lib/circuit-profiles";
 import { DnaPanel } from "@/components/DnaRadar";
 import { circuitDna } from "@/lib/f1-dna";
+import { CircuitExplorer } from "@/components/CircuitExplorer";
+import { CircuitHistory } from "@/components/CircuitHistory";
+
 
 export const Route = createFileRoute("/circuits/$circuitId")({
   head: ({ params }) => {
@@ -123,6 +126,17 @@ function CircuitPage() {
           accent="var(--accent)"
         />
       </section>
+
+      <CircuitExplorer
+        circuitId={c.id}
+        profile={profile}
+        lengthKm={c.lengthKm}
+        drsZones={c.drsZones}
+      />
+
+      <CircuitHistory circuitId={c.id} />
+
+
 
 
       {race && (
