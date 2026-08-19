@@ -56,7 +56,7 @@ export async function fetchCircuitHistory(input: {
   lat?: number;
   lon?: number;
 }): Promise<CircuitHistory> {
-  const key = `${input.circuitId}|${input.lat ?? ""}`;
+  const key = `v2|${input.circuitId}|${input.lat ?? ""}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL) return hit.data;
 
