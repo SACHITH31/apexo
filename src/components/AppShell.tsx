@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-display text-2xl tracking-widest">APEXO</span>
           </Link>
 
-          <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 whitespace-nowrap">
+          <nav className="ml-4 hidden shrink-0 lg:flex items-center gap-0.5 whitespace-nowrap xl:gap-1">
 
             {primaryNav.map((n) => (
               <Link
@@ -55,12 +55,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex min-w-0 shrink items-center gap-2">
             <Link
               to="/search"
-              className="hidden sm:flex min-w-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors w-52 max-w-full"
+              className="hidden xl:flex min-w-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors w-44 max-w-full"
             >
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">Search drivers, races…</span>
             </Link>
-            <Link to="/search" className="sm:hidden shrink-0 p-2 rounded-md hover:bg-surface" aria-label="Search">
+            <Link to="/search" className="xl:hidden shrink-0 p-2 rounded-md hover:bg-surface" aria-label="Search">
               <Search className="h-5 w-5" />
             </Link>
 
