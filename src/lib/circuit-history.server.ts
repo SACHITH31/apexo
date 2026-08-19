@@ -11,7 +11,7 @@ export interface CircuitWinner {
   date: string;
   driver: string;
   driverId: string;
-  constructor: string;
+  constructorName: string;
   constructorId: string;
   grid: number;
   time: string | null;
@@ -90,7 +90,7 @@ export async function fetchCircuitHistory(input: {
         date: String(r.date),
         driver: `${res.Driver?.givenName ?? ""} ${res.Driver?.familyName ?? ""}`.trim(),
         driverId: String(res.Driver?.driverId ?? ""),
-        constructor: String(res.Constructor?.name ?? ""),
+        constructorName: String(res.Constructor?.name ?? ""),
         constructorId: String(res.Constructor?.constructorId ?? ""),
         grid: Number(res.grid ?? 0),
         time: res.Time?.time ? String(res.Time.time) : null,

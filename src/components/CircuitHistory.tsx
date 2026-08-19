@@ -46,7 +46,7 @@ export function CircuitHistory({ circuitId }: { circuitId: string }) {
             <li key={`${w.season}-${w.round}`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
               <span className="font-timing tabular-nums text-muted-foreground w-12">{w.season}</span>
               <span className="font-medium">{w.driver}</span>
-              <span className="text-xs text-muted-foreground">{w.constructor}</span>
+              <span className="text-xs text-muted-foreground">{w.constructorName}</span>
               <span className="ml-auto text-xs uppercase tracking-widest text-muted-foreground">
                 {w.grid ? `P${w.grid} start` : "Pit lane"}
               </span>
