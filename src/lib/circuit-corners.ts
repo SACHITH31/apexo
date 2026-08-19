@@ -191,23 +191,23 @@ export function buildTrackModel(
   });
 
   // --- corners: local curvature maxima, spaced out ---------------------
-  const threshold = maxAbs * 0.28;
+  const threshold = maxAbs * 0.12;
   const candidates: number[] = [];
   for (let i = 0; i < n; i++) {
     const a = Math.abs(curve[i]);
     if (a < threshold) continue;
     if (a >= Math.abs(curve[(i - 1 + n) % n]) && a > Math.abs(curve[(i + 1) % n])) candidates.push(i);
   }
-  const minGap = Math.max(3, Math.floor(n / (profile.corners * 1.8)));
+  const minGap = Math.max(2, Math.floor(n / (profile.corners * 2.4)));
   const picked: number[] = [];
   for (const c of candidates.sort((a, b) => Math.abs(curve[b]) - Math.abs(curve[a]))) {
     if (picked.every((p) => Math.min(Math.abs(p - c), n - Math.abs(p - c)) >= minGap)) picked.push(c);
     if (picked.length >= profile.corners) break;
   }
   // top up with the most curved remaining samples if the shape is too smooth
-  let guard = 0;
-  while (picked.length < Math.min(profile.corners, 8) && guard++ < n) {
-    const c = Math.floor((guard * n) / profile.corners) % n;
+  const ranked = [...Array(n).keys()].sort((a, b) => Math.abs(curve[b]) - Math.abs(curve[a]));
+  for (const c of ranked) {
+    if (picked.length >= profile.corners) break;
     if (picked.every((p) => Math.min(Math.abs(p - c), n - Math.abs(p - c)) >= minGap)) picked.push(c);
   }
   picked.sort((a, b) => a - b);

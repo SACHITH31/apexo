@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-display text-2xl tracking-widest">APEXO</span>
           </Link>
 
-          <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <nav className="ml-6 hidden min-w-0 flex-1 lg:flex items-center gap-1 whitespace-nowrap">
 
             {primaryNav.map((n) => (
               <Link
