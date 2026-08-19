@@ -14,8 +14,8 @@ export interface CircuitWinner {
   constructor: string;
   constructorId: string;
   grid: number;
-  time?: string;
-  fastestLap?: { time: string; lap: number };
+  time: string | null;
+  fastestLap: { time: string; lap: number } | null;
 }
 
 export interface RaceDayWeather {
@@ -93,10 +93,10 @@ export async function fetchCircuitHistory(input: {
         constructor: String(res.Constructor?.name ?? ""),
         constructorId: String(res.Constructor?.constructorId ?? ""),
         grid: Number(res.grid ?? 0),
-        time: res.Time?.time,
+        time: res.Time?.time ? String(res.Time.time) : null,
         fastestLap: res.FastestLap?.Time?.time
           ? { time: String(res.FastestLap.Time.time), lap: Number(res.FastestLap.lap ?? 0) }
-          : undefined,
+          : null,
       } as CircuitWinner;
     })
     .filter(Boolean) as CircuitWinner[];

@@ -122,7 +122,7 @@ export function CircuitExplorer({
                   strokeWidth={2.6}
                   fill="none"
                   strokeLinecap="round"
-                  opacity={0.25 + s.speed * 0.75}
+                  opacity={Math.round((0.25 + s.speed * 0.75) * 1000) / 1000}
                 />
               ))}
 
