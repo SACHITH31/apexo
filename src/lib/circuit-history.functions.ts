@@ -11,5 +11,7 @@ export const getCircuitHistory = createServerFn({ method: "GET" })
   .inputValidator((data) => schema.parse(data))
   .handler(async ({ data }) => {
     const { fetchCircuitHistory } = await import("./circuit-history.server");
-    return await fetchCircuitHistory(data);
+    const history = await fetchCircuitHistory(data);
+    // Plain-clone: the raw upstream-derived objects trip the RPC serializer.
+    return JSON.parse(JSON.stringify(history)) as typeof history;
   });
